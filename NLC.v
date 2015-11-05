@@ -32,6 +32,7 @@ module NLC(
 	i_reset,
 	i_srdyi,
 	o_y
+	o_xnew
 );
 
 ///////////////////////////////////////////////////////////////////////
@@ -41,6 +42,7 @@ module NLC(
 	input i_reset;
 	input i_srdyi;
 	output o_y;
+	output o_xnew;
 	
 	reg reset;
 
@@ -82,6 +84,44 @@ fp_to_smc_float convert_to_smc(
 	.srdyi_i(i_srdyi)
 );
 
+/////////////////////////////////////////////////////////////////////////////
+//Instatiate multiplier
+wire in_mul_x_w;
+wire in_mul_y_w;
+wire out_mul_z_w;
+reg mul_in_valid_r;
+wire multiply_out_valid_w;
+
+assign in_mul_x_w = 
+
+smc_float_multiplier multiply(
+	.clk(i_clk),
+	.GlobalReset(reset),
+	.x_i_porty(in_mul_x_w),
+	.y_i_porty(in_mul_y_w),
+	.z_i_porty(out_mul_z_w),
+	.srdyi_i(mul_in_valid_r),
+	.srdyo_o(multiply_out_valid_w)
+);
+
+//////////////////////////////////////////////////////////////////////////////
+//Instatiate adder
+wire in_add_x_w;
+wire in_add_y_w;
+wire out_add_z_w;
+wire add_out_valid_w;
+reg add_in_valid_r;
+
+smc_float_adder add(
+	.clk(i_clk),
+	.GlobalReset(reset),
+	.x_i_porty(in_add_x_w),
+	.y_i_porty(in_add_y_w),
+	.z_i_porty(out_add_z_w),
+	.srdyi_i(add_in_valid_r),
+	.srdyo_o(add_out_valid_w)
+);
+
 //////////////////////////////////////////////////////////////////////////
 //Determine section of polynomial
 reg section;
@@ -91,6 +131,11 @@ reg in_mul_x_r;
 reg in_mul_y_r;
 reg in_add_x_r;
 reg in_add_y_r;
+assign in_add_x_w = in_add_x_r;
+assign in_add_y_w = in_add_y_r;
+assign in_mul_x_w = in_mul_x_r;
+assign in_mul_y_w = in_mul_y_r;
+assign o_xnew = x_new_final_r;
 
 always @(*) begin
 	if(i_srdyi == 1'b1) begin
@@ -185,44 +230,6 @@ always @(*) begin
 		end
 	end
 end
-
-/////////////////////////////////////////////////////////////////////////////
-//Instatiate multiplier
-wire in_mul_x_w;
-wire in_mul_y_w;
-wire out_mul_z_w;
-reg mul_in_valid_r;
-wire multiply_out_valid_w;
-
-assign in_mul_x_w = 
-
-smc_float_multiplier multiply(
-	.clk(i_clk),
-	.GlobalReset(reset),
-	.x_i_porty(in_mul_x_w),
-	.y_i_porty(in_mul_y_w),
-	.z_i_porty(out_mul_z_w),
-	.srdyi_i(mul_in_valid_r),
-	.srdyo_o(multiply_out_valid_w)
-);
-
-//////////////////////////////////////////////////////////////////////////////
-//Instatiate adder
-wire in_add_x_w;
-wire in_add_y_w;
-wire out_add_z_w;
-wire add_out_valid_w;
-reg add_in_valid_r;
-
-smc_float_adder add(
-	.clk(i_clk),
-	.GlobalReset(reset),
-	.x_i_porty(in_add_x_w),
-	.y_i_porty(in_add_y_w),
-	.z_i_porty(out_add_z_w),
-	.srdyi_i(add_in_valid_r),
-	.srdyo_o(add_out_valid_w)
-);
 
 ///////////////////////////////////////////////////////////////////////////////
 //Control
