@@ -31,7 +31,7 @@ module NLC(
 	i_clk,
 	i_reset,
 	i_srdyi,
-	o_y
+	o_y,
 	o_xnew
 );
 
@@ -52,23 +52,48 @@ module NLC(
 //Section 1 coefficients, mean, std
 reg section1_negmean = 32'd3356238336;
 reg section1_invstd = 32'd955174400;
-reg [31:0] section1_coeff_smcfp [0:6]= {32'd1100438400, 32'd3247697664, 32'd3258095104, 32'd1128260224, 32'd1148082048, 32'd1189805952, 32'd1205795072};
+wire [31:0] section1_coeff_smcfp [0:6];
+assign section1_coeff_smcfp[0] = 32'd1100438400;
+assign section1_coeff_smcfp[1] = 32'd3247697664;
+assign section1_coeff_smcfp[2] = 32'd3258095104;
+assign section1_coeff_smcfp[3] = 32'd1128260224;
+assign section1_coeff_smcfp[4] = 32'd1148082048;
+assign section1_coeff_smcfp[5] = 32'd1189805952;
+assign section1_coeff_smcfp[5] = 32'd1205795072;
 
 //Section 2 coefficients, mean, std
 reg section2_negmean = 32'd3341858560;
 reg section2_invstd = 32'd956637504;
-reg [31:0] section2_coeff_smcfp [0:5]= {32'd1085389056, 32'd1099873664, 32'd1105653248, 32'd1124319360, 32'd1186917120, 32'd1191718272};
+wire [31:0] section2_coeff_smcfp [0:5];
+assign section2_coeff_smcfp[0] = 32'd1085389056;
+assign section2_coeff_smcfp[1] = 32'd1099873664;
+assign section2_coeff_smcfp[2] = 32'd1105653248;
+assign section2_coeff_smcfp[3] = 32'd1124319360;
+assign section2_coeff_smcfp[4] = 32'd1186917120;
+assign section2_coeff_smcfp[5] = 32'd1191718272;
 
 //Section 3 coefficients, mean, std
 reg section3_negmean = 32'd1194374912;
 reg section3_invstd = 32'd956637504;
-reg [31:0] section3_coeff_smcfp [0:5] = {32'd1085410688, 32'd3247357952, 32'd1105635968, 32'd3271802880, 32'd1186917120, 32'd3339202048};
+wire [31:0] section3_coeff_smcfp [0:5];
+assign section3_coeff_smcfp[0] = 32'd1085410688;
+assign section3_coeff_smcfp[1] = 32'd3247357952;
+assign section3_coeff_smcfp[2] = 32'd1105635968;
+assign section3_coeff_smcfp[3] = 32'd3271802880;
+assign section3_coeff_smcfp[4] = 32'd1186917120;
+assign section3_coeff_smcfp[5] = 32'd3339202048;
 
 //Section 4 coefficients, mean, std
 reg section4_negmean = 32'd1194374912;
 reg section4_invstd = 32'd956637504;
-reg [31:0] section4_coeff_smcfp [0:6] = {32'd3247953664, 32'd3247687168, 32'd1110671616, 32'd1128256640, 32'd3295569408, 32'd1189805952, 32'd3353278720};
-
+wire [31:0] section4_coeff_smcfp [0:6];
+assign section4_coeff_smcfp[0] = 32'd3247953664;
+assign section4_coeff_smcfp[1] = 32'd3247687168;
+assign section4_coeff_smcfp[2] = 32'd1110671616;
+assign section4_coeff_smcfp[3] = 32'd1128256640;
+assign section4_coeff_smcfp[4] = 32'd3295569408;
+assign section4_coeff_smcfp[5] = 32'd1189805952;
+assign section4_coeff_smcfp[6] = 32'd3353278720;
 
 /////////////////////////////////////////////////////////////////////////
 //Convert input i_x to smc floating point
@@ -91,8 +116,6 @@ wire in_mul_y_w;
 wire out_mul_z_w;
 reg mul_in_valid_r;
 wire multiply_out_valid_w;
-
-assign in_mul_x_w = 
 
 smc_float_multiplier multiply(
 	.clk(i_clk),
@@ -165,8 +188,8 @@ always @(*) begin
 		else if(i_x <= 21'd0 && i_x > -21'd44978) begin
 			section = 2'd2;
 			//precondition x
-			in_add_x_w = x_new_w;
-			in_add_y_w = section2_negmean;
+			in_add_x_r = x_new_w;
+			in_add_y_r = section2_negmean;
 			add_in_valid_r = 1'b1;
 			//wait for adder to finish
 			while(add_out_valid_w != 1'b1) begin end		
@@ -187,8 +210,8 @@ always @(*) begin
 		else if(i_x <= 21'd44978 && i_x > 21'd0) begin
 			section = 2'd3;
 			//precondition x
-			in_add_x_w = x_new_w;
-			in_add_y_w = section3_negmean;
+			in_add_x_r = x_new_w;
+			in_add_y_r = section3_negmean;
 			add_in_valid_r = 1'b1;
 			//wait for adder to finish
 			while(add_out_valid_w != 1'b1) begin end		
@@ -209,15 +232,15 @@ always @(*) begin
 		else if(i_x > 21'd44978) begin
 			section = 2'd4;	
 			//precondition x
-			in_add_x_w = x_new_w;
-			in_add_y_w = section4_negmean;
+			in_add_x_r = x_new_w;
+			in_add_y_r = section4_negmean;
 			add_in_valid_r = 1'b1;
 			//wait for adder to finish
 			while(add_out_valid_w != 1'b1) begin end		
 			if(add_out_valid_w == 1'b1) begin
 				add_in_valid_r = 1'b0;
-				in_mul_x_w = out_add_z_w;
-				in_mul_y_w = section4_invstd;
+				in_mul_x_r = out_add_z_w;
+				in_mul_y_r = section4_invstd;
 				mul_in_valid_r = 1'b1;
 				//wait for multiply to finish
 				while(multiply_out_valid_w != 1'b1) begin end		
@@ -237,6 +260,8 @@ reg accumulator;
 reg coeff;
 reg loops_taken;
 reg nloops_r;
+reg out;
+assign o_y = out;
 integer i;
 
 always @(*) begin
@@ -261,15 +286,15 @@ always @(*) begin
 		
 		//Assign values to inputs of multiplier
 		if(x_ready_r == 1'b1) begin
-			in_mul_x_w = x_new_final_r;
-			in_mul_y_w = accumulator;
+			in_mul_x_r = x_new_final_r;
+			in_mul_y_r = accumulator;
 			mul_in_valid_r = 1'b1;
 			//When multiplier is done, assign value to inputs of adder
 			while(multiply_out_valid_w != 1'b1) begin end				
 			if(multiply_out_valid_w == 1) begin
 				mul_in_valid_r = 1'b0;
-				in_add_x_w = out_mul_z_w;
-				in_add_y_w = coeff;
+				in_add_x_r = out_mul_z_w;
+				in_add_y_r = coeff;
 				add_in_valid_r = 1'b1;
 				//when adder is done, put into accumulator
 				while(add_out_valid_w != 1'b1) begin end	
@@ -283,7 +308,7 @@ always @(*) begin
 	end	
 	
 	//output sum from accumulator
-	o_y = accumulator;
+	out = accumulator;
 end
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -293,5 +318,5 @@ always @(posedge i_clk) begin
 		reset <= 1'b1;
 end
 
-
+endmodule
 
