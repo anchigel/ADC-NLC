@@ -5,17 +5,19 @@
 //
 //
 //
-// Description:
+// Description: ADC Non-linearity Correction Engine
 //
 //
-// Parameters:
 //
 //
 // Inputs:
-// 
+// 		i_x - ADC Count
+//		i_clk - system clock
+//		i_reset - global reset
+//		i_srdyi - input enable
 //
 // Outputs:
-//
+//		o_y - Input Voltage
 //
 //
 //
@@ -23,3 +25,266 @@
 //
 //
 ///////////////////////////////////////////////////////////////////////
+
+module NLC(
+	i_x,
+	i_clk,
+	i_reset,
+	i_srdyi,
+	o_y
+);
+
+///////////////////////////////////////////////////////////////////////
+//Input & Output
+	input i_x;
+	input i_clk;
+	input i_reset;
+	input i_srdyi;
+	output o_y;
+	
+	reg reset;
+
+////////////////////////////////////////////////////////////////////////
+//Coefficients, mean, and std regs
+
+//Section 1 coefficients, mean, std
+reg section1_negmean = 32'd3356238336;
+reg section1_invstd = 32'd955174400;
+reg [31:0] section1_coeff_smcfp [0:6]= {32'd1100438400, 32'd3247697664, 32'd3258095104, 32'd1128260224, 32'd1148082048, 32'd1189805952, 32'd1205795072};
+
+//Section 2 coefficients, mean, std
+reg section2_negmean = 32'd3341858560;
+reg section2_invstd = 32'd956637504;
+reg [31:0] section2_coeff_smcfp [0:5]= {32'd1085389056, 32'd1099873664, 32'd1105653248, 32'd1124319360, 32'd1186917120, 32'd1191718272};
+
+//Section 3 coefficients, mean, std
+reg section3_negmean = 32'd1194374912;
+reg section3_invstd = 32'd956637504;
+reg [31:0] section3_coeff_smcfp [0:5] = {32'd1085410688, 32'd3247357952, 32'd1105635968, 32'd3271802880, 32'd1186917120, 32'd3339202048};
+
+//Section 4 coefficients, mean, std
+reg section4_negmean = 32'd1194374912;
+reg section4_invstd = 32'd956637504;
+reg [31:0] section4_coeff_smcfp [0:6] = {32'd3247953664, 32'd3247687168, 32'd1110671616, 32'd1128256640, 32'd3295569408, 32'd1189805952, 32'd3353278720};
+
+
+/////////////////////////////////////////////////////////////////////////
+//Convert input i_x to smc floating point
+wire x_new_w;
+wire convert_to_smc_out_valid_w;
+
+fp_to_smc_float convert_to_smc(
+	.clk(i_clk),
+	.GlobalReset(reset),
+	.y_o_portx(x_new_w),
+	.x_i(i_x),
+	.srdyo_o(convert_to_smc_out_valid_w),
+	.srdyi_i(i_srdyi)
+);
+
+//////////////////////////////////////////////////////////////////////////
+//Determine section of polynomial
+reg section;
+reg x_new_final_r;
+reg x_ready_r;
+reg in_mul_x_r;
+reg in_mul_y_r;
+reg in_add_x_r;
+reg in_add_y_r;
+
+always @(*) begin
+	if(i_srdyi == 1'b1) begin
+		x_ready_r = 1'b0;
+		if(i_x <= -21'd44978) begin
+			section = 2'd1;
+			//precondition x
+			in_add_x_r = x_new_w;
+			in_add_y_r = section1_negmean;
+			add_in_valid_r = 1'b1;
+			//wait for adder to finish
+			while(add_out_valid_w != 1'b1) begin end		
+			if(add_out_valid_w == 1'b1) begin
+				add_in_valid_r = 1'b0;
+				in_mul_x_r = out_add_z_w;
+				in_mul_y_r = section1_invstd;
+				mul_in_valid_r = 1'b1;
+				//wait for multiply to finish
+				while(multiply_out_valid_w != 1'b1) begin end		
+				if(multiply_out_valid_w == 1'b1) begin
+					mul_in_valid_r = 1'b0;
+					x_new_final_r = out_mul_z_w;
+					x_ready_r = 1'b1;
+				end
+			end
+		end
+		else if(i_x <= 21'd0 && i_x > -21'd44978) begin
+			section = 2'd2;
+			//precondition x
+			in_add_x_w = x_new_w;
+			in_add_y_w = section2_negmean;
+			add_in_valid_r = 1'b1;
+			//wait for adder to finish
+			while(add_out_valid_w != 1'b1) begin end		
+			if(add_out_valid_w == 1'b1) begin
+				add_in_valid_r = 1'b0;
+				in_mul_x_r = out_add_z_w;
+				in_mul_y_r = section2_invstd;
+				mul_in_valid_r = 1'b1;
+				//wait for multiply to finish
+				while(multiply_out_valid_w != 1'b1) begin end		
+				if(multiply_out_valid_w == 1'b1) begin
+					mul_in_valid_r = 1'b0;
+					x_new_final_r = out_mul_z_w;
+					x_ready_r = 1'b1;
+				end
+			end
+		end
+		else if(i_x <= 21'd44978 && i_x > 21'd0) begin
+			section = 2'd3;
+			//precondition x
+			in_add_x_w = x_new_w;
+			in_add_y_w = section3_negmean;
+			add_in_valid_r = 1'b1;
+			//wait for adder to finish
+			while(add_out_valid_w != 1'b1) begin end		
+			if(add_out_valid_w == 1'b1) begin
+				add_in_valid_r = 1'b0;
+				in_mul_x_r = out_add_z_w;
+				in_mul_y_r = section3_invstd;
+				mul_in_valid_r = 1'b1;
+				//wait for multiply to finish
+				while(multiply_out_valid_w != 1'b1) begin end		
+				if(multiply_out_valid_w == 1'b1) begin
+					mul_in_valid_r = 1'b0;
+					x_new_final_r = out_mul_z_w;
+					x_ready_r = 1'b1;
+				end
+			end
+		end
+		else if(i_x > 21'd44978) begin
+			section = 2'd4;	
+			//precondition x
+			in_add_x_w = x_new_w;
+			in_add_y_w = section4_negmean;
+			add_in_valid_r = 1'b1;
+			//wait for adder to finish
+			while(add_out_valid_w != 1'b1) begin end		
+			if(add_out_valid_w == 1'b1) begin
+				add_in_valid_r = 1'b0;
+				in_mul_x_w = out_add_z_w;
+				in_mul_y_w = section4_invstd;
+				mul_in_valid_r = 1'b1;
+				//wait for multiply to finish
+				while(multiply_out_valid_w != 1'b1) begin end		
+				if(multiply_out_valid_w == 1'b1) begin
+					mul_in_valid_r = 1'b0;
+					x_new_final_r = out_mul_z_w;
+					x_ready_r = 1'b1;
+				end
+			end
+		end
+	end
+end
+
+/////////////////////////////////////////////////////////////////////////////
+//Instatiate multiplier
+wire in_mul_x_w;
+wire in_mul_y_w;
+wire out_mul_z_w;
+reg mul_in_valid_r;
+wire multiply_out_valid_w;
+
+assign in_mul_x_w = 
+
+smc_float_multiplier multiply(
+	.clk(i_clk),
+	.GlobalReset(reset),
+	.x_i_porty(in_mul_x_w),
+	.y_i_porty(in_mul_y_w),
+	.z_i_porty(out_mul_z_w),
+	.srdyi_i(mul_in_valid_r),
+	.srdyo_o(multiply_out_valid_w)
+);
+
+//////////////////////////////////////////////////////////////////////////////
+//Instatiate adder
+wire in_add_x_w;
+wire in_add_y_w;
+wire out_add_z_w;
+wire add_out_valid_w;
+reg add_in_valid_r;
+
+smc_float_adder add(
+	.clk(i_clk),
+	.GlobalReset(reset),
+	.x_i_porty(in_add_x_w),
+	.y_i_porty(in_add_y_w),
+	.z_i_porty(out_add_z_w),
+	.srdyi_i(add_in_valid_r),
+	.srdyo_o(add_out_valid_w)
+);
+
+///////////////////////////////////////////////////////////////////////////////
+//Control
+reg accumulator;
+reg coeff;
+reg loops_taken;
+reg nloops_r;
+integer i;
+
+always @(*) begin
+	case(section)
+		2'd1: nloops_r = 7;
+		2'd2: nloops_r = 6;
+		2'd3: nloops_r = 6;
+		2'd4: nloops_r = 7;
+	endcase
+end
+
+always @(*) begin
+
+	for(i = 0; i < nloops_r; i = i+1) begin
+		//Select coefficients based on section
+		case(section)
+			2'd1: coeff = section1_coeff_smcfp[i];
+			2'd2: coeff = section2_coeff_smcfp[i];
+			2'd3: coeff = section3_coeff_smcfp[i];
+			2'd4: coeff = section4_coeff_smcfp[i];
+		endcase
+		
+		//Assign values to inputs of multiplier
+		if(x_ready_r == 1'b1) begin
+			in_mul_x_w = x_new_final_r;
+			in_mul_y_w = accumulator;
+			mul_in_valid_r = 1'b1;
+			//When multiplier is done, assign value to inputs of adder
+			while(multiply_out_valid_w != 1'b1) begin end				
+			if(multiply_out_valid_w == 1) begin
+				mul_in_valid_r = 1'b0;
+				in_add_x_w = out_mul_z_w;
+				in_add_y_w = coeff;
+				add_in_valid_r = 1'b1;
+				//when adder is done, put into accumulator
+				while(add_out_valid_w != 1'b1) begin end	
+				if(add_out_valid_w == 1'b1) begin
+					add_in_valid_r = 1'b0;
+					accumulator = accumulator + out_add_z_w;
+					loops_taken = loops_taken + 1;
+				end
+			end
+		end
+	end	
+	
+	//output sum from accumulator
+	o_y = accumulator;
+end
+
+////////////////////////////////////////////////////////////////////////////////
+//At clock edge
+always @(posedge i_clk) begin
+	if(i_reset == 1'b1)
+		reset <= 1'b1;
+end
+
+
+
