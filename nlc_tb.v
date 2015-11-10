@@ -10,6 +10,8 @@ module NLC_tb();
 	wire [31:0] o_xnew_tb;
 	wire o_srdyo_tb;
 	wire [2:0] o_state_tb;
+	wire [1:0] o_section_tb;
+	wire [31:0] o_accum_tb;
 	
 	wire	[3:0]	test_instruction;
 	
@@ -29,7 +31,9 @@ NLC NLC00(
     .o_y     (   o_y_tb     ),
     .o_xnew    (   o_xnew_tb         ),
 	.o_srdyo (o_srdyo_tb),
-	.o_state(o_state_tb)
+	.o_state(o_state_tb),
+	.o_section(o_section_tb),
+	.o_accum(o_accum_tb)
 	);
 
 
@@ -47,11 +51,26 @@ initial begin
 	
 	i_reset_tb = 1'b1;
 	#81 i_reset_tb = 1'b0;
-	#81 i_x_tb = -21'd50000;
+
+	//section 1
+	#81 i_x_tb = -21'd80000;
 	i_srdyi_tb = 1'b1;
-	#81 i_srdyi_tb = 1'b0;
-	
-	
+	#162 i_srdyi_tb = 1'b0;
+	#250000
+	//section 2
+	#81 i_x_tb = 21'd0;
+	i_srdyi_tb = 1'b1;
+	#162 i_srdyi_tb = 1'b0;
+	#25000
+	//section 3
+	#81 i_x_tb = 21'd40000;
+	i_srdyi_tb = 1'b1;
+	#162 i_srdyi_tb = 1'b0;
+	#25000
+	//section 4
+	#81 i_x_tb = 21'd60000;
+	i_srdyi_tb = 1'b1;
+	#162 i_srdyi_tb = 1'b0;
 	/*case (test_instruction)
 	4'b0000:
 		begin
@@ -72,7 +91,7 @@ initial begin
 	
 	i_x_tb = 21'd20000;*/
 	
-	#100000 $stop;
+	#25000 $stop;
 	end
 	
 	endmodule
