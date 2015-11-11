@@ -56,8 +56,8 @@ module NLC(
 	reg reset;
 	
 	//Accumulator loop
-	reg signed [31:0] accumulator_r;
-	reg signed coeff_r;
+	reg [31:0] accumulator_r;
+	reg coeff_r;
 	integer loops_taken_r;
 	integer nloops_r;
 
@@ -78,7 +78,8 @@ module NLC(
 	
 	//Convert x to smc
 	reg signed [20:0] x_in_r;
-	wire signed [31:0] x_new_w;
+	wire [31:0] x_new_w;
+	reg [31:0] x_new_r;
 	wire convert_to_smc_out_valid_w;
 	//wire [20:0] in_fp_to_smc_w;
 	reg signed [20:0] in_fp_to_smc_r;
@@ -92,31 +93,30 @@ module NLC(
 	wire signed [20:0] out_smc_to_fp_w;
 	reg signed [20:0] out_smc_to_fp_r;
 	//wire [31:0] in_smc_to_fp_w;
-	reg signed [31:0] in_smc_to_fp_r;
+	reg [31:0] in_smc_to_fp_r;
 	//wire smc_to_fp_in_valid_w;
 	reg smc_to_fp_in_valid_r;
 	//assign in_smc_to_fp_w = in_smc_to_fp_r;
 	
 	//Multiplier
-	wire signed [31:0] out_mul_z_w;
+	wire [31:0] out_mul_z_w;
 	wire multiply_out_valid_w;
 	reg mul_in_valid_r;
-	reg signed [31:0] in_mul_x_r;
-	reg signed [31:0] in_mul_y_r;
-	reg signed [31:0] out_mul_z_r;
+	reg [31:0] in_mul_x_r;
+	reg [31:0] in_mul_y_r;
+	reg [31:0] out_mul_z_r;
 
 	//Adder
 	wire add_out_valid_w;
 	reg add_in_valid_r;
-	reg signed [31:0] in_add_x_r;
-	reg signed [31:0] in_add_y_r;
-	reg signed [31:0] out_add_z_r;
-	wire signed [31:0] out_add_z_w;
+	reg [31:0] in_add_x_r;
+	reg [31:0] in_add_y_r;
+	reg [31:0] out_add_z_r;
+	wire [31:0] out_add_z_w;
 	
 	//Determine sections
 	reg [1:0] section_r;
-	reg signed [31:0] x_new_final_r;
-	reg signed [31:0] x_ready_r;
+	reg [31:0] x_new_final_r;
 	reg in_enable_r;
 	assign o_xnew = x_new_final_r;
 	
@@ -249,11 +249,11 @@ always @(*) begin
 		S1: begin
 			if(convert_to_smc_out_valid_w == 1'b1) begin
 				next_state = S2;
-				//fp_to_smc_in_valid_r = 1'b0;
-				reset = 1'b1;
+				x_new_r = x_new_w;
+				//reset = 1'b1;
 			end
 			else begin
-				reset = 1'b0;
+				//reset = 1'b0;
 				next_state = S1;
 			end
 		end
@@ -262,38 +262,35 @@ always @(*) begin
 				next_state = S3;
 				out_add_z_r = out_add_z_w;
 				add_in_valid_r = 1'b0;
-				reset = 1'b1;
-				//mul_in_valid_r = 1'b0;
+				//reset = 1'b1;
 			end
 			else begin
 				next_state = S2;
-				reset = 1'b0;
+				//reset = 1'b0;
 			end
 		end
 		S3: begin
 			if(multiply_out_valid_w == 1'b1) begin
 				next_state = S4;
-				//add_in_valid_r = 1'b0;
 				mul_in_valid_r = 1'b0;
 				x_new_final_r = out_mul_z_w;
-				reset = 1'b1;
+				//reset = 1'b1;
 			end
 			else begin
 				next_state = S3;	
-				reset = 1'b0;
+				//reset = 1'b0;
 			end
 		end
 		S4: begin
 			if(multiply_out_valid_w == 1'b1) begin
 				next_state = S5;
 				out_mul_z_r = out_mul_z_w;
-				//add_in_valid_r = 1'b0;
 				mul_in_valid_r = 1'b0;
-				reset = 1'b1;
+				//reset = 1'b1;
 			end
 			else begin
 				next_state = S4;
-				reset = 1'b0;
+				//reset = 1'b0;
 			end
 		end
 		S5: begin
@@ -301,36 +298,20 @@ always @(*) begin
 				next_state = S6;
 				out_add_z_r = out_add_z_w;
 				add_in_valid_r = 1'b0;
-				//mul_in_valid_r = 1'b0;
-				reset = 1'b1;
+				//reset = 1'b1;
 			end
 			else begin
 				next_state = S5;	
-				reset = 1'b0;
+				//reset = 1'b0;
 			end
 		end
 		S6: begin
-			/*if(loops_taken_r == nloops_r) begin
+			loops_taken_r = loops_taken_r + 1;
+			if(loops_taken_r == nloops_r)
 				next_state = S7;
-				reset = 1'b1;
-				add_in_valid_r = 1'b0;
-			end
-			else*/ if(add_out_valid_w == 1'b1) begin
-				out_add_z_r = out_add_z_w;
-				accumulator_r = out_add_z_r;
-				loops_taken_r = loops_taken_r + 1;	
-				if(loops_taken_r == nloops_r)
-					next_state = S7;
-				else
-					next_state = S4;
-				reset = 1'b1;
-				add_in_valid_r = 1'b0;
-				//mul_in_valid_r = 1'b0;		
-			end
-			else begin
-				next_state = S6;
-				reset = 1'b0;
-			end
+			else
+				next_state = S4;
+			//reset = 1'b1;
 		end
 		S7: begin
 			if(convert_to_fp_out_valid_w == 1'b1) begin
@@ -339,11 +320,9 @@ always @(*) begin
 				out_enable_r = 1'b1;
 				smc_to_fp_in_valid_r = 1'b0;
 				next_state = S0;
-				//reset = 1'b1;
 			end
 			else begin
 				next_state = S7;
-				//reset = 1'b0;
 			end
 		end
 	endcase
@@ -374,7 +353,6 @@ always @(state) begin
 	case(state) 
 		S0: begin //initial state
 			out_enable_r = 1'b0;
-			x_ready_r = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;
 			smc_to_fp_in_valid_r = 1'b0;
 			add_in_valid_r = 1'b0;
@@ -389,22 +367,22 @@ always @(state) begin
 		S2: begin //add -mean to x
 			case(section_r)
 				2'd0: begin
-					in_add_x_r = x_new_w;
+					in_add_x_r = x_new_r;
 					in_add_y_r = section1_negmean;
 					add_in_valid_r = 1'b1;
 				end
 				2'd1: begin
-					in_add_x_r = x_new_w;
+					in_add_x_r = x_new_r;
 					in_add_y_r = section2_negmean;
 					add_in_valid_r = 1'b1;
 				end
 				2'd2: begin
-					in_add_x_r = x_new_w;
+					in_add_x_r = x_new_r;
 					in_add_y_r = section2_negmean;
 					add_in_valid_r = 1'b1;
 				end
 				2'd3: begin
-					in_add_x_r = x_new_w;
+					in_add_x_r = x_new_r;
 					in_add_y_r = section2_negmean;
 					add_in_valid_r = 1'b1;
 				end
@@ -436,24 +414,26 @@ always @(state) begin
 		end
 		S4: begin //multiple current sum and x
 			in_mul_x_r = x_new_final_r;
+			//in_mul_x_r = x_new_w;
 			in_mul_y_r = accumulator_r;
 			mul_in_valid_r = 1'b1;
 		end
 		S5: begin //add coeff to product
 			case(section_r)
-				2'd0: coeff_r = section1_coeff_smcfp[nloops_r - loops_taken_r - 1];
-				2'd1: coeff_r = section2_coeff_smcfp[nloops_r - loops_taken_r - 1];
-				2'd2: coeff_r = section3_coeff_smcfp[nloops_r - loops_taken_r - 1];
-				2'd3: coeff_r = section4_coeff_smcfp[nloops_r - loops_taken_r - 1];
+				2'd0: coeff_r = section1_coeff_smcfp[loops_taken_r];
+				2'd1: coeff_r = section2_coeff_smcfp[loops_taken_r];
+				2'd2: coeff_r = section3_coeff_smcfp[loops_taken_r];
+				2'd3: coeff_r = section4_coeff_smcfp[loops_taken_r];
 			endcase
 			in_add_x_r = out_mul_z_r;
 			in_add_y_r = coeff_r;
 			add_in_valid_r = 1'b1;
 		end
 		S6: begin //Accumulate sum
-			in_add_x_r = accumulator_r;
-			in_add_y_r = out_add_z_r;
-			add_in_valid_r = 1'b1;
+			accumulator_r = out_add_z_r;
+			//in_add_x_r = accumulator_r;
+			//in_add_y_r = out_add_z_r;
+			//add_in_valid_r = 1'b1;
 		end
 		S7: begin //convert y from smc to fp
 			in_smc_to_fp_r = accumulator_r;
