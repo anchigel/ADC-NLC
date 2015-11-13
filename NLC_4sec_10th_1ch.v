@@ -219,7 +219,7 @@ module NLC_4sec_10th_1ch(
 	//Output enable
 	reg out_enable_r;
 	reg out_enable_2_r;
-	assign srdyo = out_enable_2_r;
+	assign srdyo = out_enable_r;
 	
 	//Convert x to smc
 	//reg signed [20:0] x_in_r;
@@ -262,6 +262,7 @@ module NLC_4sec_10th_1ch(
 	parameter S5 = 3'b101; //add sum to coeff
 	parameter S6 = 3'b110; //accumulate
 	parameter S7 = 3'b111; //convert y to fp
+	//parameter S8 = 3'b1000; //convert y to fp
 	
 	parameter order = 4'd10;
 	
@@ -339,14 +340,12 @@ always @(*) begin
 				next_state = S2;
 				x_new_r = x_new_w;
 				fp_to_smc_in_valid_r = 1'b0;
-				//rst = 1'b1;
 			end
 			else begin
 				if(in_enable_r == 1'b1) begin
 					
 				end
 				next_state = S1;
-				//rst = 1'b0;
 			end
 		end
 		S2: begin //add -mean to x
@@ -354,11 +353,9 @@ always @(*) begin
 				next_state = S3;
 				out_add_z_r = out_add_z_w;
 				add_in_valid_r = 1'b0;
-				//rst = 1'b1;
 			end
 			else begin
 				next_state = S2;
-				//rst = 1'b0;
 			end
 		end
 		S3: begin //multiple 1/std and (x-mean)
@@ -366,23 +363,21 @@ always @(*) begin
 				next_state = S4;
 				x_new_final_r = out_mul_z_w;
 				mul_in_valid_r = 1'b0;
-				//rst = 1'b1;
 			end
 			else begin
 				next_state = S3;	
-				//rst = 1'b0;
 			end
 		end
 		S4: begin //multiply x and current accumulator
-			if(multiply_out_valid_w == 1'b1) begin
+			if(loops_taken_r == 0)
+				next_state = S5;
+			else if(multiply_out_valid_w == 1'b1) begin
 				next_state = S5;
 				out_mul_z_r = out_mul_z_w;
 				mul_in_valid_r = 1'b0;
-				//rst = 1'b1;
 			end
 			else begin
 				next_state = S4;
-				//rst = 1'b0;
 			end
 		end
 		S5: begin //add coeff to product
@@ -390,37 +385,30 @@ always @(*) begin
 				next_state = S6;
 				out_add_z_r = out_add_z_w;
 				add_in_valid_r = 1'b0;
-				//rst = 1'b1;
 			end
 			else begin
 				next_state = S5;	
-				//rst = 1'b0;
 			end
 		end
-		S6: begin //convert final y to fp
+		S6: begin
 			if(convert_to_fp_out_valid_w == 1'b1) begin
 				out_smc_to_fp_r = out_smc_to_fp_w;
 				out_r = out_smc_to_fp_r;
-				//out_enable_r = 1'b1;
 				smc_to_fp_in_valid_r = 1'b0;
 				next_state = S7;
-				//rst = 1'b1;
 			end
 			else begin
 				next_state = S6;
-				//rst = 1'b0;
 			end
 		end
-		S7: begin //count number of iterations
+		S7: begin
 			if(loops_taken_r > order) begin
 				next_state = S0;
 				out_enable_r = 1'b1;
 				out_r = out_smc_to_fp_r;
-				//rst = 1'b1;
 			end
 			else begin
 				next_state = S4;
-				//rst = 1'b0;
 			end
 		end
 	endcase
@@ -451,7 +439,6 @@ always @(*) begin
 		coeffs10_r = coeff_4_10;
 		mean_r = neg_mean_4;
 		std_r = recip_stdev_4;
-		//section = 3'd4;
 	end
 	else if(i_x_r[20] == 1'b0 && i_x_r != 21'd0 && abs_x <= section_limit) begin //Section 3
 		coeffs0_r = coeff_3_0;
@@ -467,7 +454,6 @@ always @(*) begin
 		coeffs10_r = coeff_3_10;
 		mean_r = neg_mean_3;
 		std_r = recip_stdev_3;
-		//section = 3'd3;
 	end
 	else if((i_x_r[20] == 1'b1 || i_x_r == 21'd0)  && abs_x <= section_limit) begin //Section 2
 		coeffs0_r = coeff_2_0;
@@ -483,7 +469,6 @@ always @(*) begin
 		coeffs10_r = coeff_2_10;
 		mean_r = neg_mean_2;
 		std_r = recip_stdev_2;
-		//section = 3'd2;
 	end
 	else if((i_x_r[20] == 1'b1 || i_x_r == 21'd0)  && abs_x > section_limit) begin //Section 1
 		coeffs0_r = coeff_1_0;
@@ -499,7 +484,6 @@ always @(*) begin
 		coeffs10_r = coeff_1_10;
 		mean_r = neg_mean_1;
 		std_r = recip_stdev_1;
-		//section = 3'd1;
 	end
 end
 
@@ -509,6 +493,7 @@ always @(state) begin
 	case(state) 
 		S0: begin //initial state
 			out_enable_r = 1'b0;
+			out_enable_2_r = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;
 			smc_to_fp_in_valid_r = 1'b0;
 			add_in_valid_r = 1'b0;
@@ -516,7 +501,7 @@ always @(state) begin
 			loops_taken_r = 0;
 			accumulator_r = 32'b00000000000000000000000000000000;
 			out_r = 20'b00000000000000000000;
-			//sum_rst_r = 1'b0;
+			out_2_r = 20'b00000000000000000000;
 		end
 		S1: begin //convert x from fp to smc
 			in_fp_to_smc_r = x_adc;
@@ -561,13 +546,12 @@ always @(state) begin
 			endcase
 			add_in_valid_r = 1'b1;
 		end
-		S6: begin //convert x_lin from smc to fp
+		S6: begin 
 			in_smc_to_fp_r = out_add_z_r;
 			smc_to_fp_in_valid_r = 1'b1;
-			
 		end
-		S7: begin //Accumulate sum
-			accumulator_r = out_add_z_r;
+		S7: begin 
+			accumulator_r = out_add_z_r;			
 		end
 	endcase
 end
@@ -585,7 +569,7 @@ always @(posedge clk) begin
 		rst <= reset;
 		state <= next_state;
 		in_enable_r <= srdyi;
-		out_enable_2_r <= out_enable_r;
+		//out_enable_2_r <= out_enable_r;
 		out_2_r <= out_r;
 	end	
 end
