@@ -214,7 +214,7 @@ module NLC_4sec_10th_1ch(
 	//Output
 	reg [20:0] out_r;
 	reg [20:0] out_2_r;
-	assign x_lin = out_2_r;
+	assign x_lin = out_r;
 
 	//Output enable
 	reg out_enable_r;
@@ -329,7 +329,7 @@ smc_float_adder add(
 always @(*) begin
 	case(state) 
 		S0: begin
-			if(in_enable_r == 1'b1) begin
+			if(srdyi == 1'b1) begin
 				next_state = S1;
 			end
 			else
@@ -342,9 +342,6 @@ always @(*) begin
 				fp_to_smc_in_valid_r = 1'b0;
 			end
 			else begin
-				if(in_enable_r == 1'b1) begin
-					
-				end
 				next_state = S1;
 			end
 		end
@@ -391,26 +388,21 @@ always @(*) begin
 			end
 		end
 		S6: begin
-			if(convert_to_fp_out_valid_w == 1'b1) begin
-				out_smc_to_fp_r = out_smc_to_fp_w;
-				out_r = out_smc_to_fp_r;
-				smc_to_fp_in_valid_r = 1'b0;
-				next_state = S7;
-			end
-			else begin
-				next_state = S6;
-			end
-		end
-		S7: begin
 			if(loops_taken_r > order) begin
-				next_state = S0;
-				out_enable_r = 1'b1;
-				out_r = out_smc_to_fp_r;
+				next_state = S6;
+				if(convert_to_fp_out_valid_w == 1'b1) begin
+					out_smc_to_fp_r = out_smc_to_fp_w;
+					out_r = out_smc_to_fp_r;
+					smc_to_fp_in_valid_r = 1'b0;
+					next_state = S0;
+					out_enable_r = 1'b1;
+				end
 			end
 			else begin
 				next_state = S4;
 			end
 		end
+
 	endcase
 end
 
@@ -493,15 +485,13 @@ always @(state) begin
 	case(state) 
 		S0: begin //initial state
 			out_enable_r = 1'b0;
-			out_enable_2_r = 1'b0;
-			fp_to_smc_in_valid_r = 1'b0;
-			smc_to_fp_in_valid_r = 1'b0;
-			add_in_valid_r = 1'b0;
-			mul_in_valid_r = 1'b0;
 			loops_taken_r = 0;
 			accumulator_r = 32'b00000000000000000000000000000000;
-			out_r = 20'b00000000000000000000;
-			out_2_r = 20'b00000000000000000000;
+			//out_r = 20'b00000000000000000000;
+			if(srdyi == 1'b1) begin
+				in_fp_to_smc_r = x_adc;
+				fp_to_smc_in_valid_r = 1'b1;
+			end
 		end
 		S1: begin //convert x from fp to smc
 			in_fp_to_smc_r = x_adc;
@@ -547,11 +537,11 @@ always @(state) begin
 			add_in_valid_r = 1'b1;
 		end
 		S6: begin 
-			in_smc_to_fp_r = out_add_z_r;
-			smc_to_fp_in_valid_r = 1'b1;
-		end
-		S7: begin 
-			accumulator_r = out_add_z_r;			
+			accumulator_r = out_add_z_r;
+			if(loops_taken_r > order) begin
+				in_smc_to_fp_r = accumulator_r;
+				smc_to_fp_in_valid_r = 1'b1;
+			end
 		end
 	endcase
 end
@@ -568,9 +558,6 @@ always @(posedge clk) begin
 	else begin
 		rst <= reset;
 		state <= next_state;
-		in_enable_r <= srdyi;
-		//out_enable_2_r <= out_enable_r;
-		out_2_r <= out_r;
 	end	
 end
 
