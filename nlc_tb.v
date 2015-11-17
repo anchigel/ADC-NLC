@@ -2,89 +2,69 @@
 
 module NLC_tb();
 
-	reg [20:0] i_x_tb;
-	reg i_clk_tb;
-	reg i_reset_tb;
-	reg i_srdyi_tb;
-	wire [31:0]o_y_tb;
-	wire o_srdyo_tb;
-	wire [2:0] o_state_tb;
-	wire [31:0] o_accum_tb;
-	wire [31:0] o_test_tb;
-	reg [31:0] i_coeffs1_tb;
-	reg [31:0] i_coeffs2_tb;
-	reg [31:0] i_coeffs3_tb;
-	reg [31:0] i_coeffs4_tb;
-	reg [31:0] i_coeffs5_tb;
-	reg [31:0] i_coeffs6_tb;
-	reg [31:0] i_coeffs7_tb;
-	reg [31:0] i_coeffs8_tb;
-	reg [31:0] i_coeffs9_tb;
-	reg [31:0] i_coeffs10_tb;
-	reg [31:0] i_mean_tb;
-	reg [31:0] i_std_tb;
-	
-	wire	[3:0]	test_instruction;
-	
-	//Section 1 coefficients, mean, std
-	wire [31:0] section1_negmean = 32'd3356238336;
-	wire [31:0] section1_invstd = 32'd955174400;
-	wire [31:0] section1_coeff_smcfp [0:9];
-	assign section1_coeff_smcfp[6] = 32'd1100438400;
-	assign section1_coeff_smcfp[5] = 32'd3247697664;
-	assign section1_coeff_smcfp[4] = 32'd3258095104;
-	assign section1_coeff_smcfp[3] = 32'd1128260224;
-	assign section1_coeff_smcfp[2] = 32'd1148082048;
-	assign section1_coeff_smcfp[1] = 32'd1189805952;
-	assign section1_coeff_smcfp[0] = 32'd1205795072;
-	assign section1_coeff_smcfp[7] = 32'd0;
-	assign section1_coeff_smcfp[8] = 32'd0;
-	assign section1_coeff_smcfp[9] = 32'd0;
-
-	//Section 2 coefficients, mean, std
-	wire [31:0] section2_negmean = 32'd3341858560;
-	wire [31:0] section2_invstd = 32'd956637504;
-	wire [31:0] section2_coeff_smcfp [0:9];
-	assign section2_coeff_smcfp[5] = 32'd1085389056;
-	assign section2_coeff_smcfp[4] = 32'd1099873664;
-	assign section2_coeff_smcfp[3] = 32'd1105653248;
-	assign section2_coeff_smcfp[2] = 32'd1124319360;
-	assign section2_coeff_smcfp[1] = 32'd1186917120;
-	assign section2_coeff_smcfp[0] = 32'd1191718272;
-	assign section2_coeff_smcfp[6] = 32'd0;
-	assign section2_coeff_smcfp[7] = 32'd0;
-	assign section2_coeff_smcfp[8] = 32'd0;
-	assign section2_coeff_smcfp[9] = 32'd0;
-
-	//Section 3 coefficients, mean, std
-	wire [31:0] section3_negmean = 32'd1194374912;
-	wire [31:0] section3_invstd = 32'd956637504;
-	wire [31:0] section3_coeff_smcfp [0:9];
-	assign section3_coeff_smcfp[5] = 32'd1085410688;
-	assign section3_coeff_smcfp[4] = 32'd3247357952;
-	assign section3_coeff_smcfp[3] = 32'd1105635968;
-	assign section3_coeff_smcfp[2] = 32'd3271802880;
-	assign section3_coeff_smcfp[1] = 32'd1186917120;
-	assign section3_coeff_smcfp[0] = 32'd3339202048;
-	assign section3_coeff_smcfp[6] = 32'd0;
-	assign section3_coeff_smcfp[7] = 32'd0;
-	assign section3_coeff_smcfp[8] = 32'd0;
-	assign section3_coeff_smcfp[9] = 32'd0;
-
-	//Section 4 coefficients, mean, std
-	wire [31:0] section4_negmean = 32'd1194374912;
-	wire [31:0] section4_invstd = 32'd956637504;
-	wire [31:0] section4_coeff_smcfp [0:9];
-	assign section4_coeff_smcfp[6] = 32'd3247953664;
-	assign section4_coeff_smcfp[5] = 32'd3247687168;
-	assign section4_coeff_smcfp[4] = 32'd1110671616;
-	assign section4_coeff_smcfp[3] = 32'd1128256640;
-	assign section4_coeff_smcfp[2] = 32'd3295569408;
-	assign section4_coeff_smcfp[1] = 32'd1189805952;
-	assign section4_coeff_smcfp[0] = 32'd3353278720;
-	assign section4_coeff_smcfp[7] = 32'd0;
-	assign section4_coeff_smcfp[8] = 32'd0;
-	assign section4_coeff_smcfp[9] = 32'd0;
+  reg clk;
+  reg GlobalReset;
+  reg [31:0] select_section_coefficients_stdev_4_porty; // ufix32
+  reg [31:0] select_section_coefficients_stdev_3_porty; // ufix32
+  reg [31:0] select_section_coefficients_stdev_2_porty; // ufix32
+  reg [31:0] select_section_coefficients_stdev_1_porty; // ufix32
+  reg [31:0] select_section_coefficients_mean_4_porty;// ufix32
+  reg [31:0] select_section_coefficients_mean_3_porty; // ufix32
+  reg [31:0] select_section_coefficients_mean_2_porty; // ufix32
+  reg [31:0] select_section_coefficients_mean_1_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_4_9_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_4_8_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_4_7_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_4_6_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_4_5_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_4_4_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_4_3_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_4_2_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_4_10_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_4_1_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_4_0_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_3_9_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_3_8_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_3_7_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_3_6_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_3_5_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_3_4_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_3_3_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_3_2_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_3_10_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_3_1_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_3_0_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_2_9_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_2_8_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_2_7_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_2_6_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_2_5_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_2_4_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_2_3_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_2_2_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_2_10_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_2_1_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_2_0_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_1_9_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_1_8_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_1_7_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_1_6_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_1_5_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_1_4_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_1_3_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_1_2_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_1_10_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_1_1_porty; // ufix32
+  reg [31:0] select_section_coefficients_coeff_1_0_porty; // ufix32
+  wire [20:0] x_lin; // sfix21
+  reg [20:0] x_adc; // sfix21
+  wire srdyo; // ufix1
+  reg srdyi; // ufix1
+  reg [19:0] section_limit; // ufix20
+  wire [2:0] o_state;
+  wire [2:0] o_section;
+  wire [20:0] o_abs_x;
+  wire [31:0] o_test;
 	
 //////////////////////////////////////////////////////////////////////
 // assign the instruction you want to test: 
@@ -94,122 +74,186 @@ assign	test_instruction = 4'b0000;
 //////////////////////////////////////////////////////////////////////
 
 // Instantiate a Design Under Test (DUT)
-NLC NLC00(
-    .i_x    (   i_x_tb            ),
-    .i_clk  (   i_clk_tb           ),
-    .i_reset   (   i_reset_tb          ),
-    .i_srdyi   (   i_srdyi_tb          ),
-	.i_coeffs1(i_coeffs1_tb),
-	.i_coeffs2(i_coeffs2_tb),
-	.i_coeffs3(i_coeffs3_tb),
-	.i_coeffs4(i_coeffs4_tb),
-	.i_coeffs5(i_coeffs5_tb),
-	.i_coeffs6(i_coeffs6_tb),
-	.i_coeffs7(i_coeffs7_tb),
-	.i_coeffs8(i_coeffs8_tb),
-	.i_coeffs9(i_coeffs9_tb),
-	.i_coeffs10(i_coeffs10_tb),
-	.i_mean(i_mean_tb),
-	.i_std(i_std_tb),
-    .o_y     (   o_y_tb     ),
-	.o_srdyo (o_srdyo_tb),
-	.o_state(o_state_tb),
-	.o_accum(o_accum_tb),
-	.o_test(o_test_tb)
+NLC_4sec_10th_1ch NLC00(
+  //System clock and reset
+  .clk(clk),
+  .reset(GlobalReset),
+  
+  //ADC output
+  .srdyi(srdyi), 
+  .x_lin(x_lin),
+
+  //NLC output
+  .srdyo(srdyo), 
+  .x_adc(x_adc), 
+
+  //X-value that separates the sections
+  .section_limit(section_limit),
+
+  //Reciprocal standard deviation for the centered and scaled fit
+  .recip_stdev_4(select_section_coefficients_stdev_4_porty), 
+  .recip_stdev_3(select_section_coefficients_stdev_3_porty), 
+  .recip_stdev_2(select_section_coefficients_stdev_2_porty), 
+  .recip_stdev_1(select_section_coefficients_stdev_1_porty), 
+
+  //Negative meand for the centered and scaled fit
+  .neg_mean_4(select_section_coefficients_mean_4_porty), 
+  .neg_mean_3(select_section_coefficients_mean_3_porty), 
+  .neg_mean_2(select_section_coefficients_mean_2_porty), 
+  .neg_mean_1(select_section_coefficients_mean_1_porty), 
+
+  //Section 4 coefficients (x > 0, |x| > section_limit)
+  .coeff_4_10(select_section_coefficients_coeff_4_10_porty), 
+  .coeff_4_9(select_section_coefficients_coeff_4_9_porty), 
+  .coeff_4_8(select_section_coefficients_coeff_4_8_porty), 
+  .coeff_4_7(select_section_coefficients_coeff_4_7_porty), 
+  .coeff_4_6(select_section_coefficients_coeff_4_6_porty), 
+  .coeff_4_5(select_section_coefficients_coeff_4_5_porty), 
+  .coeff_4_4(select_section_coefficients_coeff_4_4_porty), 
+  .coeff_4_3(select_section_coefficients_coeff_4_3_porty), 
+  .coeff_4_2(select_section_coefficients_coeff_4_2_porty), 
+  .coeff_4_1(select_section_coefficients_coeff_4_1_porty), 
+  .coeff_4_0(select_section_coefficients_coeff_4_0_porty), 
+
+  //Section 3 coefficients (x > 0, |x| <= section_limit)
+  .coeff_3_10(select_section_coefficients_coeff_3_10_porty), 
+  .coeff_3_9(select_section_coefficients_coeff_3_9_porty), 
+  .coeff_3_8(select_section_coefficients_coeff_3_8_porty), 
+  .coeff_3_7(select_section_coefficients_coeff_3_7_porty), 
+  .coeff_3_6(select_section_coefficients_coeff_3_6_porty), 
+  .coeff_3_5(select_section_coefficients_coeff_3_5_porty), 
+  .coeff_3_4(select_section_coefficients_coeff_3_4_porty), 
+  .coeff_3_3(select_section_coefficients_coeff_3_3_porty), 
+  .coeff_3_2(select_section_coefficients_coeff_3_2_porty), 
+  .coeff_3_1(select_section_coefficients_coeff_3_1_porty), 
+  .coeff_3_0(select_section_coefficients_coeff_3_0_porty), 
+
+  //Section 2 coefficients (x <= 0, |x| <= section_limit)
+  .coeff_2_10(select_section_coefficients_coeff_2_10_porty), 
+  .coeff_2_9(select_section_coefficients_coeff_2_9_porty), 
+  .coeff_2_8(select_section_coefficients_coeff_2_8_porty), 
+  .coeff_2_7(select_section_coefficients_coeff_2_7_porty), 
+  .coeff_2_6(select_section_coefficients_coeff_2_6_porty), 
+  .coeff_2_5(select_section_coefficients_coeff_2_5_porty), 
+  .coeff_2_4(select_section_coefficients_coeff_2_4_porty), 
+  .coeff_2_3(select_section_coefficients_coeff_2_3_porty), 
+  .coeff_2_2(select_section_coefficients_coeff_2_2_porty), 
+  .coeff_2_1(select_section_coefficients_coeff_2_1_porty), 
+  .coeff_2_0(select_section_coefficients_coeff_2_0_porty), 
+
+  //Section 1 coefficients (x <= 0, |x| > section_limit)
+  .coeff_1_10(select_section_coefficients_coeff_1_10_porty), 
+  .coeff_1_9(select_section_coefficients_coeff_1_9_porty), 
+  .coeff_1_8(select_section_coefficients_coeff_1_8_porty), 
+  .coeff_1_7(select_section_coefficients_coeff_1_7_porty), 
+  .coeff_1_6(select_section_coefficients_coeff_1_6_porty), 
+  .coeff_1_5(select_section_coefficients_coeff_1_5_porty), 
+  .coeff_1_4(select_section_coefficients_coeff_1_4_porty), 
+  .coeff_1_3(select_section_coefficients_coeff_1_3_porty), 
+  .coeff_1_2(select_section_coefficients_coeff_1_2_porty), 
+  .coeff_1_1(select_section_coefficients_coeff_1_1_porty), 
+  .coeff_1_0(select_section_coefficients_coeff_1_0_porty),
+  
+  //.o_section(o_section),
+  //.o_state(o_state),
+  //.o_abs_x(o_abs_x),
+  .o_test(o_test)
 	);
 
 
 // Oscillate the clock (cycle time is 162ns and 6.14Mhz)
-always #81 i_clk_tb = ~i_clk_tb;
+always #81 clk = ~clk;
 //always #80 i_srdyi;
 
 
 initial begin
+	clk = 1'b1;
+	GlobalReset = 1'b1;
+	#162 GlobalReset = 1'b0;
 	
-	 i_x_tb =  21'd0;
-	 i_clk_tb = 1'b1 ;
-	 i_reset_tb = 1'b0;
-	 i_srdyi_tb = 1'b0;
+  select_section_coefficients_stdev_4_porty = 32'b00111000110101110111110110000111;// ufix32
+  select_section_coefficients_stdev_3_porty = 32'b00111000110110010001110110111100;// ufix32
+  select_section_coefficients_stdev_2_porty = 32'b00111000110110010001110110111100;// ufix32
+   select_section_coefficients_stdev_1_porty = 32'b00111000110101110111110110000111;// ufix32
+   select_section_coefficients_mean_4_porty = 32'b11001000001011000110000010000000;// ufix32
+   select_section_coefficients_mean_3_porty = 32'b11000111011000100010110000000000;// ufix32
+   select_section_coefficients_mean_2_porty = 32'b01000111011000100010110000000000;// ufix32
+   select_section_coefficients_mean_1_porty = 32'b01001000001011000110000000000000;// ufix32
+   select_section_coefficients_coeff_4_9_porty = 32'b11000001110010011011100000000000;// ufix32
+   select_section_coefficients_coeff_4_8_porty = 32'b01000011011100000101110010000000;// ufix32
+   select_section_coefficients_coeff_4_7_porty = 32'b01000010110010110001110000000000;// ufix32
+   select_section_coefficients_coeff_4_6_porty = 32'b11000011110001101000001000000000;// ufix32
+   select_section_coefficients_coeff_4_5_porty = 32'b11000011000000000001010100000000;// ufix32
+   select_section_coefficients_coeff_4_4_porty = 32'b01000011100001000001111100000000;// ufix32
+   select_section_coefficients_coeff_4_3_porty = 32'b01000010111111110011010110000000;// ufix32
+   select_section_coefficients_coeff_4_2_porty = 32'b01000011101110101010010000000000;// ufix32
+   select_section_coefficients_coeff_4_10_porty = 32'b11000010010000100110000000000000;// ufix32
+   select_section_coefficients_coeff_4_1_porty = 32'b01000110000010110111111000000000;// ufix32
+   select_section_coefficients_coeff_4_0_porty = 32'b01000111000011000000101100000000;// ufix32
+   select_section_coefficients_coeff_3_9_porty = 32'b00000000110111011101000001000110;// ufix32
+   select_section_coefficients_coeff_3_8_porty = 32'b01000001100110101010010010000000;// ufix32
+   select_section_coefficients_coeff_3_7_porty = 32'b01000000111100110111011110000000;// ufix32
+   select_section_coefficients_coeff_3_6_porty = 32'b11000010100100110110011000000000;// ufix32
+   select_section_coefficients_coeff_3_5_porty = 32'b11000001110100100110000000000000;// ufix32
+   select_section_coefficients_coeff_3_4_porty = 32'b01000010101001100010101100000000;// ufix32
+   select_section_coefficients_coeff_3_3_porty = 32'b01000010001110111100000100000000;// ufix32
+   select_section_coefficients_coeff_3_2_porty = 32'b01000010010101010000000100000000;// ufix32
+   select_section_coefficients_coeff_3_10_porty = 32'b00000000110111011101000001000110;// ufix32
+   select_section_coefficients_coeff_3_1_porty = 32'b01000101111010110100111110000000;// ufix32
+   select_section_coefficients_coeff_3_0_porty = 32'b01000110001011101010010010000000;// ufix32
+   select_section_coefficients_coeff_2_9_porty = 32'b00000000110111011101000001000110;// ufix32
+   select_section_coefficients_coeff_2_8_porty = 32'b11000001100110101000001000000000;// ufix32
+   select_section_coefficients_coeff_2_7_porty = 32'b01000000111100110100011110000000;// ufix32
+   select_section_coefficients_coeff_2_6_porty = 32'b01000010100100110011111110000000;// ufix32
+   select_section_coefficients_coeff_2_5_porty = 32'b11000001110100100011011000000000;// ufix32
+   select_section_coefficients_coeff_2_4_porty = 32'b11000010101001011111010000000000;// ufix32
+   select_section_coefficients_coeff_2_3_porty = 32'b01000010001110111010110000000000;// ufix32
+   select_section_coefficients_coeff_2_2_porty = 32'b11000010010101010011011000000000;// ufix32
+   select_section_coefficients_coeff_2_10_porty = 32'b00000000110111011101000001000110;// ufix32
+   select_section_coefficients_coeff_2_1_porty = 32'b01000101111010110101000000000000;// ufix32
+   select_section_coefficients_coeff_2_0_porty = 32'b11000110001011101010010000000000;// ufix32
+   select_section_coefficients_coeff_1_9_porty = 32'b11000001110010011011100000000000;// ufix32
+   select_section_coefficients_coeff_1_8_porty = 32'b11000011011100000010001000000000;// ufix32
+   select_section_coefficients_coeff_1_7_porty = 32'b01000010110010110010101010000000;// ufix32
+   select_section_coefficients_coeff_1_6_porty = 32'b01000011110001100101101010000000;// ufix32
+   select_section_coefficients_coeff_1_5_porty = 32'b11000011000000000010101000000000;// ufix32
+   select_section_coefficients_coeff_1_4_porty = 32'b11000011100001000001000100000000;// ufix32
+   select_section_coefficients_coeff_1_3_porty = 32'b01000010111111110101101010000000;// ufix32
+   select_section_coefficients_coeff_1_2_porty = 32'b11000011101110101010001100000000;// ufix32
+   select_section_coefficients_coeff_1_10_porty = 32'b01000010010000100010110000000000; // ufix32
+   select_section_coefficients_coeff_1_1_porty = 32'b01000110000010110111111000000000;// ufix32
+   select_section_coefficients_coeff_1_0_porty = 32'b11000111000011000000101100000000; // ufix32
 	
-	i_reset_tb = 1'b1;
-	#81 i_reset_tb = 1'b0;
-
+	section_limit = 20'b00001101111111110000; // ufix20
+	
+  
 	//section 4
-	#81 
-	i_coeffs1_tb = section4_coeff_smcfp[0];
-	i_coeffs2_tb = section4_coeff_smcfp[1];
-	i_coeffs3_tb = section4_coeff_smcfp[2];
-	i_coeffs4_tb = section4_coeff_smcfp[3];
-	i_coeffs5_tb = section4_coeff_smcfp[4];
-	i_coeffs6_tb = section4_coeff_smcfp[5];
-	i_coeffs7_tb = section4_coeff_smcfp[6];
-	i_coeffs8_tb = section4_coeff_smcfp[7];
-	i_coeffs9_tb = section4_coeff_smcfp[8];
-	i_coeffs10_tb = section4_coeff_smcfp[9];
-	i_mean_tb = section4_negmean;
-	i_std_tb = section4_invstd;
-	i_x_tb = -21'd80000;
-	i_srdyi_tb = 1'b1;
-	#162 i_srdyi_tb = 1'b0;
-	#25272
+	x_adc = 21'b000011100011100100011; // sfix21
+	srdyi = 1'b1; // ufix1
+	#162 srdyi = 1'b0; // ufix1
+	#55000
 	
 	//section 3
-	#81 
-	i_coeffs1_tb = section3_coeff_smcfp[0];
-	i_coeffs2_tb = section3_coeff_smcfp[1];
-	i_coeffs3_tb = section3_coeff_smcfp[2];
-	i_coeffs4_tb = section3_coeff_smcfp[3];
-	i_coeffs5_tb = section3_coeff_smcfp[4];
-	i_coeffs6_tb = section3_coeff_smcfp[5];
-	i_coeffs7_tb = section3_coeff_smcfp[6];
-	i_coeffs8_tb = section3_coeff_smcfp[7];
-	i_coeffs9_tb = section3_coeff_smcfp[8];
-	i_coeffs10_tb = section3_coeff_smcfp[9];
-	i_mean_tb = section3_negmean;
-	i_std_tb = section3_invstd;
-	i_x_tb = 21'd0;
-	i_srdyi_tb = 1'b1;
-	#162 i_srdyi_tb = 1'b0;
-	#25272
+	x_adc = 21'd25000;
+	srdyi = 1'b1;
+	#162 srdyi = 1'b0; // ufix1
+	#55000
 	
 	//section 2
-	#81 
-	i_coeffs1_tb = section2_coeff_smcfp[0];
-	i_coeffs2_tb = section2_coeff_smcfp[1];
-	i_coeffs3_tb = section2_coeff_smcfp[2];
-	i_coeffs4_tb = section2_coeff_smcfp[3];
-	i_coeffs5_tb = section2_coeff_smcfp[4];
-	i_coeffs6_tb = section2_coeff_smcfp[5];
-	i_coeffs7_tb = section2_coeff_smcfp[6];
-	i_coeffs8_tb = section2_coeff_smcfp[7];
-	i_coeffs9_tb = section2_coeff_smcfp[8];
-	i_coeffs10_tb = section2_coeff_smcfp[9];
-	i_mean_tb = section3_negmean;
-	i_std_tb = section3_invstd;
-	i_x_tb = 21'd40000;
-	i_srdyi_tb = 1'b1;
-	#162 i_srdyi_tb = 1'b0;
-	#25272
+	x_adc = -21'd25000;
+	srdyi = 1'b1;
+	#162 srdyi = 1'b0; // ufix1
+	#55000
 	
 	//section 1
-	#81 
-	i_coeffs1_tb = section1_coeff_smcfp[0];
-	i_coeffs2_tb = section1_coeff_smcfp[1];
-	i_coeffs3_tb = section1_coeff_smcfp[2];
-	i_coeffs4_tb = section1_coeff_smcfp[3];
-	i_coeffs5_tb = section1_coeff_smcfp[4];
-	i_coeffs6_tb = section1_coeff_smcfp[5];
-	i_coeffs7_tb = section1_coeff_smcfp[6];
-	i_coeffs8_tb = section1_coeff_smcfp[7];
-	i_coeffs9_tb = section1_coeff_smcfp[8];
-	i_coeffs10_tb = section1_coeff_smcfp[9];
-	i_mean_tb = section1_negmean;
-	i_std_tb = section1_invstd;
-	i_x_tb = 21'd60000;
-	i_srdyi_tb = 1'b1;
-	#162 i_srdyi_tb = 1'b0;
+	x_adc = -21'd80000;
+	srdyi = 1'b1;
+	#162 srdyi = 1'b0; // ufix1
+	#35000
 	
-	#25272 $stop;
+	#55000 $stop;
+	
+	
 	end
 	
 	endmodule
