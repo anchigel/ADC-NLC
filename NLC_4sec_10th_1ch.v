@@ -3,10 +3,11 @@
 //
 // EEM216A Fall 2015
 //
+// Anchi Su
+// Giovoni King
 //
-//
-// Description: ADC Non-linearity Correction Engine
-
+// Description: ADC Non-linearity Correction Engine - 1 channel
+//				4 sections, 10th order
 ///////////////////////////////////////////////////////////////////////
 
 module NLC_4sec_10th_1ch(
@@ -89,11 +90,6 @@ module NLC_4sec_10th_1ch(
 	coeff_1_2, 
 	coeff_1_1, 
 	coeff_1_0
-	
-	//o_state,
-	//o_section,
-	//o_abs_x,
-	//o_test
 );
 
 ///////////////////////////////////////////////////////////////////////
@@ -178,17 +174,9 @@ module NLC_4sec_10th_1ch(
 	//X-value that separates the sections
 	input [19:0] section_limit;
 	
-	//output [2:0] o_section;
-	//output [2:0] o_state;
-	//output [20:0] o_abs_x;
-	//output [31:0] o_test;
 	//Reset
 	reg rst;
-	
 	reg in_enable_r;
-	//reg sum_en_r;
-	//reg sum_rst_r;
-	reg [31:0] x_new_final_r;
 	
 	//Coefficients, mean, and std
 	reg [31:0] coeffs0_r;
@@ -207,7 +195,6 @@ module NLC_4sec_10th_1ch(
 	
 	//Accumulator loop
 	reg [31:0] accumulator_r;
-	reg coeff_r;
 	integer loops_taken_r;
 	integer nloops_r;
 
@@ -218,21 +205,19 @@ module NLC_4sec_10th_1ch(
 
 	//Output enable
 	reg out_enable_r;
-	reg out_enable_2_r;
 	assign srdyo = out_enable_r;
 	
 	//Convert x to smc
-	//reg signed [20:0] x_in_r;
 	wire [31:0] x_new_w;
 	reg [31:0] x_new_r;
 	wire convert_to_smc_out_valid_w;
-	reg signed [20:0] in_fp_to_smc_r;
+	reg [20:0] in_fp_to_smc_r;
 	reg fp_to_smc_in_valid_r;
+	reg [31:0] x_new_final_r;
 	
 	//Convert y to fp
 	wire convert_to_fp_out_valid_w;
-	wire signed [20:0] out_smc_to_fp_w;
-	reg signed [20:0] out_smc_to_fp_r;
+	wire [20:0] out_smc_to_fp_w;
 	reg [31:0] in_smc_to_fp_r;
 	reg smc_to_fp_in_valid_r;
 	
@@ -252,7 +237,6 @@ module NLC_4sec_10th_1ch(
 	reg [31:0] out_add_z_r;
 	wire [31:0] out_add_z_w;
 	
-	
 	//Parameters
 	parameter S0 = 3'b000; //wait for x input 
 	parameter S1 = 3'b001; //fp to smc conversion for x
@@ -262,21 +246,15 @@ module NLC_4sec_10th_1ch(
 	parameter S5 = 3'b101; //add sum to coeff
 	parameter S6 = 3'b110; //accumulate
 	parameter S7 = 3'b111; //convert y to fp
-	//parameter S8 = 3'b1000; //convert y to fp
 	
 	parameter order = 4'd10;
 	
 	//States
 	reg [2:0] state;
 	reg [2:0] next_state;
+	
 	reg [20:0] abs_x;
 	reg [31:0] i_x_r;
-	
-	//assign o_state = state;
-	reg [2:0] section;
-	//assign o_section = section;
-	//assign o_abs_x = abs_x;
-	//assign o_test = out_add_z_r;
 
 /////////////////////////////////////////////////////////////////////////
 //Convert input x_adc to smc floating point
@@ -329,9 +307,8 @@ smc_float_adder add(
 always @(*) begin
 	case(state) 
 		S0: begin
-			if(srdyi == 1'b1) begin
+			if(in_enable_r == 1'b1)
 				next_state = S1;
-			end
 			else
 				next_state = S0;
 		end
@@ -391,11 +368,13 @@ always @(*) begin
 			if(loops_taken_r > order) begin
 				next_state = S6;
 				if(convert_to_fp_out_valid_w == 1'b1) begin
-					out_smc_to_fp_r = out_smc_to_fp_w;
-					out_r = out_smc_to_fp_r;
-					smc_to_fp_in_valid_r = 1'b0;
+					//out_smc_to_fp_r = out_smc_to_fp_w;
+					//out_r = out_smc_to_fp_r;
+					out_r = out_smc_to_fp_w;
 					next_state = S0;
 					out_enable_r = 1'b1;
+					smc_to_fp_in_valid_r = 1'b0;
+					in_enable_r = 1'b0;
 				end
 			end
 			else begin
@@ -409,10 +388,11 @@ end
 ////////////////////////////////////////////////////////////////////////////
 //Determine section
 always @(*) begin
-	i_x_r = x_adc;
+	//i_x_r = x_adc;
 	//Get abs of x_adc
 	if(i_x_r[20] == 1'b1)
-		abs_x = -i_x_r;
+		//abs_x = -i_x_r;
+		abs_x = {1'b0, ~i_x_r} + 1;
 	else
 		abs_x = i_x_r;
 	
@@ -487,14 +467,14 @@ always @(state) begin
 			out_enable_r = 1'b0;
 			loops_taken_r = 0;
 			accumulator_r = 32'b00000000000000000000000000000000;
-			//out_r = 20'b00000000000000000000;
-			if(srdyi == 1'b1) begin
-				in_fp_to_smc_r = x_adc;
-				fp_to_smc_in_valid_r = 1'b1;
-			end
+
+			fp_to_smc_in_valid_r = 1'b0;
+			smc_to_fp_in_valid_r = 1'b0;
+			add_in_valid_r = 1'b0;
+			mul_in_valid_r = 1'b0;
 		end
 		S1: begin //convert x from fp to smc
-			in_fp_to_smc_r = x_adc;
+			in_fp_to_smc_r = i_x_r;
 			fp_to_smc_in_valid_r = 1'b1;
 		end
 		S2: begin //add -mean to x
@@ -554,10 +534,18 @@ always @(posedge clk) begin
 	if(reset == 1'b1) begin
 		rst <= reset;
 		state <= S0;
+		if(srdyi == 1'b1) begin
+			i_x_r <= x_adc;
+			in_enable_r <= srdyi;
+		end
 	end
 	else begin
 		rst <= reset;
 		state <= next_state;
+		if(srdyi == 1'b1) begin
+			i_x_r <= x_adc;
+			in_enable_r <= srdyi;
+		end
 	end	
 end
 
