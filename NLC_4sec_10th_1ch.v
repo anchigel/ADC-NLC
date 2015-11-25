@@ -11,7 +11,10 @@
 ///////////////////////////////////////////////////////////////////////
 
 module NLC_4sec_10th_1ch(
-
+	o_state,
+	o_test,
+	o_test2,
+	o_accum,
 	//System clock and reset
 	clk,
 	reset,
@@ -95,6 +98,10 @@ module NLC_4sec_10th_1ch(
 ///////////////////////////////////////////////////////////////////////
 //Input & Output
 	
+	output [2:0] o_state;
+	output [31:0] o_test;
+	output [31:0] o_test2;
+	output [31:0] o_accum;
 	//System clock and reset
 	input clk;
 	input reset;
@@ -255,6 +262,11 @@ module NLC_4sec_10th_1ch(
 	
 	reg [20:0] abs_x;
 	reg [31:0] i_x_r;
+	
+	assign o_state = state;
+	assign o_test = in_add_y_r;
+	assign o_test2 = in_add_x_r;
+	assign o_accum = out_add_z_w;
 
 /////////////////////////////////////////////////////////////////////////
 //Convert input x_adc to smc floating point
@@ -304,51 +316,113 @@ smc_float_adder add(
 
 /////////////////////////////////////////////////////////////////////////////
 //Next state logic
+integer x_conditioned_ready;
 always @(*) begin
 	case(state) 
 		S0: begin
-			if(in_enable_r == 1'b1)
+			out_enable_r = 1'b0;
+			loops_taken_r = 0;
+			accumulator_r = 32'b00000000000000000000000000000000;
+			x_conditioned_ready = 0;
+			fp_to_smc_in_valid_r = 1'b0;
+			smc_to_fp_in_valid_r = 1'b0;
+			add_in_valid_r = 1'b0;
+			mul_in_valid_r = 1'b0;
+			if(srdyi == 1'b1) begin//convert x to smc 
 				next_state = S1;
+				in_fp_to_smc_r = x_adc;
+				fp_to_smc_in_valid_r = srdyi;
+			end
 			else
 				next_state = S0;
 		end
-		S1: begin //convert x to smc 
+		S1: begin //when output ready, send to adder
 			if(convert_to_smc_out_valid_w == 1'b1) begin
 				next_state = S2;
 				x_new_r = x_new_w;
-				fp_to_smc_in_valid_r = 1'b0;
+				in_add_x_r = x_new_r;
+				in_add_y_r = mean_r;
+				add_in_valid_r = convert_to_smc_out_valid_w;
 			end
 			else begin
 				next_state = S1;
 			end
 		end
-		S2: begin //add -mean to x
+		S2: begin //when adder output ready, send to multiplier
 			if(add_out_valid_w == 1'b1) begin
 				next_state = S3;
 				out_add_z_r = out_add_z_w;
-				add_in_valid_r = 1'b0;
+				in_mul_x_r = out_add_z_r;
+				in_mul_y_r = std_r;
+				mul_in_valid_r = add_out_valid_w;
 			end
 			else begin
 				next_state = S2;
 			end
 		end
-		S3: begin //multiple 1/std and (x-mean)
+		S3: begin //when multiplier output ready, send back to multiplier with accumulator
 			if(multiply_out_valid_w == 1'b1) begin
 				next_state = S4;
-				x_new_final_r = out_mul_z_w;
-				mul_in_valid_r = 1'b0;
+				if(x_conditioned_ready == 1'b0)
+					x_new_final_r = out_mul_z_w;
+				else
+					x_conditioned_ready = x_conditioned_ready + 1;
+				in_mul_x_r = x_new_final_r;
+				in_mul_y_r = accumulator_r;
+				mul_in_valid_r = multiply_out_valid_w;
 			end
 			else begin
 				next_state = S3;	
 			end
 		end
+		//S4: begin
+		//	next_state = S5;
+		//	loops_taken_r = loops_taken_r + 1;
+		//end
 		S4: begin //multiply x and current accumulator
-			if(loops_taken_r == 0)
+			//if(loops_taken_r == 0)
+			//	next_state = S5;
+			if(multiply_out_valid_w == 1'b1) begin
 				next_state = S5;
-			else if(multiply_out_valid_w == 1'b1) begin
-				next_state = S5;
-				out_mul_z_r = out_mul_z_w;
-				mul_in_valid_r = 1'b0;
+				loops_taken_r = loops_taken_r + 1;
+				if(loops_taken_r == 1) begin
+					out_mul_z_r = 32'b00000000000000000000000000000000;
+					in_add_x_r = out_mul_z_r;
+					case(loops_taken_r)
+						1: in_add_y_r = coeffs10_r;
+						2: in_add_y_r = coeffs9_r;
+						3: in_add_y_r = coeffs8_r;
+						4: in_add_y_r = coeffs7_r;
+						5: in_add_y_r = coeffs6_r;
+						6: in_add_y_r = coeffs5_r;
+						7: in_add_y_r = coeffs4_r;
+						8: in_add_y_r = coeffs3_r;
+						9: in_add_y_r = coeffs2_r;
+						10: in_add_y_r = coeffs1_r;
+						11: in_add_y_r = coeffs0_r;
+						default: in_add_y_r = 0;
+					endcase
+					add_in_valid_r = multiply_out_valid_w;
+				end
+				else begin
+					out_mul_z_r = out_mul_z_w;
+					in_add_x_r = out_mul_z_r;
+					case(loops_taken_r)
+						1: in_add_y_r = coeffs10_r;
+						2: in_add_y_r = coeffs9_r;
+						3: in_add_y_r = coeffs8_r;
+						4: in_add_y_r = coeffs7_r;
+						5: in_add_y_r = coeffs6_r;
+						6: in_add_y_r = coeffs5_r;
+						7: in_add_y_r = coeffs4_r;
+						8: in_add_y_r = coeffs3_r;
+						9: in_add_y_r = coeffs2_r;
+						10: in_add_y_r = coeffs1_r;
+						11: in_add_y_r = coeffs0_r;
+						default: in_add_y_r = 0;
+					endcase
+					add_in_valid_r = multiply_out_valid_w;
+				end
 			end
 			else begin
 				next_state = S4;
@@ -356,30 +430,38 @@ always @(*) begin
 		end
 		S5: begin //add coeff to product
 			if(add_out_valid_w == 1'b1) begin
-				next_state = S6;
-				out_add_z_r = out_add_z_w;
-				add_in_valid_r = 1'b0;
-			end
-			else begin
-				next_state = S5;	
-			end
-		end
-		S6: begin
-			if(loops_taken_r > order) begin
-				next_state = S6;
-				if(convert_to_fp_out_valid_w == 1'b1) begin
+				//next_state = S7;
+				//out_add_z_r = out_add_z_w;
+				accumulator_r = out_add_z_w;
+				//add_in_valid_r = 1'b0;
+				if(loops_taken_r > order) begin
+					next_state = S6;
 					//out_smc_to_fp_r = out_smc_to_fp_w;
 					//out_r = out_smc_to_fp_r;
-					out_r = out_smc_to_fp_w;
-					next_state = S0;
-					out_enable_r = 1'b1;
-					smc_to_fp_in_valid_r = 1'b0;
-					in_enable_r = 1'b0;
+					//smc_to_fp_in_valid_r = 1'b0;
+					in_smc_to_fp_r = accumulator_r;	
+					smc_to_fp_in_valid_r = add_out_valid_w;
+				end
+				else begin
+					next_state = S5;
+					in_mul_x_r = x_new_final_r;
+					in_mul_y_r = accumulator_r;
+					mul_in_valid_r = add_out_valid_w;
 				end
 			end
 			else begin
-				next_state = S4;
+				next_state = S6;	
 			end
+		end
+		S6: begin
+			if(convert_to_fp_out_valid_w == 1'b1) begin
+				out_r = out_smc_to_fp_w;
+				out_enable_r = 1'b1;
+				next_state = S0;
+				in_enable_r = 1'b0;
+			end
+			else
+				next_state = S6;
 		end
 
 	endcase
@@ -390,77 +472,80 @@ end
 always @(*) begin
 	//i_x_r = x_adc;
 	//Get abs of x_adc
-	if(i_x_r[20] == 1'b1)
-		//abs_x = -i_x_r;
-		abs_x = {1'b0, ~i_x_r} + 1;
-	else
-		abs_x = i_x_r;
-	
-	//Determine which coeffs, mean, and std to use
-	if(i_x_r[20] == 1'b0 && i_x_r != 21'd0 && abs_x > section_limit) begin //Section 4
-		coeffs0_r = coeff_4_0;
-		coeffs1_r = coeff_4_1;
-		coeffs2_r = coeff_4_2;
-		coeffs3_r = coeff_4_3;
-		coeffs4_r = coeff_4_4;
-		coeffs5_r = coeff_4_5;
-		coeffs6_r = coeff_4_6;
-		coeffs7_r = coeff_4_7;
-		coeffs8_r = coeff_4_8;
-		coeffs9_r = coeff_4_9;
-		coeffs10_r = coeff_4_10;
-		mean_r = neg_mean_4;
-		std_r = recip_stdev_4;
-	end
-	else if(i_x_r[20] == 1'b0 && i_x_r != 21'd0 && abs_x <= section_limit) begin //Section 3
-		coeffs0_r = coeff_3_0;
-		coeffs1_r = coeff_3_1;
-		coeffs2_r = coeff_3_2;
-		coeffs3_r = coeff_3_3;
-		coeffs4_r = coeff_3_4;
-		coeffs5_r = coeff_3_5;
-		coeffs6_r = coeff_3_6;
-		coeffs7_r = coeff_3_7;
-		coeffs8_r = coeff_3_8;
-		coeffs9_r = coeff_3_9;
-		coeffs10_r = coeff_3_10;
-		mean_r = neg_mean_3;
-		std_r = recip_stdev_3;
-	end
-	else if((i_x_r[20] == 1'b1 || i_x_r == 21'd0)  && abs_x <= section_limit) begin //Section 2
-		coeffs0_r = coeff_2_0;
-		coeffs1_r = coeff_2_1;
-		coeffs2_r = coeff_2_2;
-		coeffs3_r = coeff_2_3;
-		coeffs4_r = coeff_2_4;
-		coeffs5_r = coeff_2_5;
-		coeffs6_r = coeff_2_6;
-		coeffs7_r = coeff_2_7;
-		coeffs8_r = coeff_2_8;
-		coeffs9_r = coeff_2_9;
-		coeffs10_r = coeff_2_10;
-		mean_r = neg_mean_2;
-		std_r = recip_stdev_2;
-	end
-	else if((i_x_r[20] == 1'b1 || i_x_r == 21'd0)  && abs_x > section_limit) begin //Section 1
-		coeffs0_r = coeff_1_0;
-		coeffs1_r = coeff_1_1;
-		coeffs2_r = coeff_1_2;
-		coeffs3_r = coeff_1_3;
-		coeffs4_r = coeff_1_4;
-		coeffs5_r = coeff_1_5;
-		coeffs6_r = coeff_1_6;
-		coeffs7_r = coeff_1_7;
-		coeffs8_r = coeff_1_8;
-		coeffs9_r = coeff_1_9;
-		coeffs10_r = coeff_1_10;
-		mean_r = neg_mean_1;
-		std_r = recip_stdev_1;
+	if(srdyi == 1'b1) begin
+		if(i_x_r[20] == 1'b1)
+			//abs_x = -i_x_r;
+			abs_x = {1'b0, ~i_x_r} + 1;
+		else
+			abs_x = i_x_r;
+		
+		//Determine which coeffs, mean, and std to use
+		if(i_x_r[20] == 1'b0 && i_x_r != 21'd0 && abs_x > section_limit) begin //Section 4
+			coeffs0_r = coeff_4_0;
+			coeffs1_r = coeff_4_1;
+			coeffs2_r = coeff_4_2;
+			coeffs3_r = coeff_4_3;
+			coeffs4_r = coeff_4_4;
+			coeffs5_r = coeff_4_5;
+			coeffs6_r = coeff_4_6;
+			coeffs7_r = coeff_4_7;
+			coeffs8_r = coeff_4_8;
+			coeffs9_r = coeff_4_9;
+			coeffs10_r = coeff_4_10;
+			mean_r = neg_mean_4;
+			std_r = recip_stdev_4;
+		end
+		else if(i_x_r[20] == 1'b0 && i_x_r != 21'd0 && abs_x <= section_limit) begin //Section 3
+			coeffs0_r = coeff_3_0;
+			coeffs1_r = coeff_3_1;
+			coeffs2_r = coeff_3_2;
+			coeffs3_r = coeff_3_3;
+			coeffs4_r = coeff_3_4;
+			coeffs5_r = coeff_3_5;
+			coeffs6_r = coeff_3_6;
+			coeffs7_r = coeff_3_7;
+			coeffs8_r = coeff_3_8;
+			coeffs9_r = coeff_3_9;
+			coeffs10_r = coeff_3_10;
+			mean_r = neg_mean_3;
+			std_r = recip_stdev_3;
+		end
+		else if((i_x_r[20] == 1'b1 || i_x_r == 21'd0)  && abs_x <= section_limit) begin //Section 2
+			coeffs0_r = coeff_2_0;
+			coeffs1_r = coeff_2_1;
+			coeffs2_r = coeff_2_2;
+			coeffs3_r = coeff_2_3;
+			coeffs4_r = coeff_2_4;
+			coeffs5_r = coeff_2_5;
+			coeffs6_r = coeff_2_6;
+			coeffs7_r = coeff_2_7;
+			coeffs8_r = coeff_2_8;
+			coeffs9_r = coeff_2_9;
+			coeffs10_r = coeff_2_10;
+			mean_r = neg_mean_2;
+			std_r = recip_stdev_2;
+		end
+		else if((i_x_r[20] == 1'b1 || i_x_r == 21'd0)  && abs_x > section_limit) begin //Section 1
+			coeffs0_r = coeff_1_0;
+			coeffs1_r = coeff_1_1;
+			coeffs2_r = coeff_1_2;
+			coeffs3_r = coeff_1_3;
+			coeffs4_r = coeff_1_4;
+			coeffs5_r = coeff_1_5;
+			coeffs6_r = coeff_1_6;
+			coeffs7_r = coeff_1_7;
+			coeffs8_r = coeff_1_8;
+			coeffs9_r = coeff_1_9;
+			coeffs10_r = coeff_1_10;
+			mean_r = neg_mean_1;
+			std_r = recip_stdev_1;
+		end
 	end
 end
 
 ///////////////////////////////////////////////////////////////////////////
 //State logic
+/*
 always @(state) begin
 	case(state) 
 		S0: begin //initial state
@@ -525,7 +610,7 @@ always @(state) begin
 		end
 	endcase
 end
-
+*/
 
 ////////////////////////////////////////////////////////////////////////////////
 //At clock edge
@@ -534,6 +619,13 @@ always @(posedge clk) begin
 	if(reset == 1'b1) begin
 		rst <= reset;
 		state <= S0;
+		out_enable_r = 1'b0;
+		loops_taken_r = 0;
+		accumulator_r = 32'b00000000000000000000000000000000;
+		fp_to_smc_in_valid_r = 1'b0;
+		smc_to_fp_in_valid_r = 1'b0;
+		add_in_valid_r = 1'b0;
+		mul_in_valid_r = 1'b0;
 		if(srdyi == 1'b1) begin
 			i_x_r <= x_adc;
 			in_enable_r <= srdyi;
