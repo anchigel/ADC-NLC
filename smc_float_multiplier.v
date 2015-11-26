@@ -11,7 +11,7 @@
 // ********************************************************************
 
 // Generated from /smc_float_multiplier.slx Version 1.16 Last modified date Fri Oct 23 15:29:00 2015
-module x_i (
+module x1_i (
   input clk,
   input GlobalEnable1,
   input GlobalReset,
@@ -29,7 +29,7 @@ endmodule
 
 //-----------------------------------------
 
-module z_o (
+module z1_o (
   input clk,
   input GlobalEnable1,
   input GlobalReset,
@@ -538,19 +538,19 @@ wire [31:0] N_6;
 wire GlobalResetSel;
   wire GlobalEnable1;
   assign GlobalEnable1 = 1;
-    x_i  myx_i (
+    x1_i  myx_i (
       .clk(clk),
       .GlobalEnable1(GlobalEnable1),
       .GlobalReset(GlobalResetSel),
       .porty(x_i_N_porty_1_11),
       .y(N_6)    );
-    x_i  myy_i (
+    x1_i  myy_i (
       .clk(clk),
       .GlobalEnable1(GlobalEnable1),
       .GlobalReset(GlobalResetSel),
       .porty(y_i_N_porty_1_5),
       .y(N_7)    );
-    z_o  myz_o (
+    z1_o  myz_o (
       .clk(clk),
       .GlobalEnable1(GlobalEnable1),
       .GlobalReset(GlobalResetSel),

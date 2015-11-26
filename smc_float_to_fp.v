@@ -11,7 +11,7 @@
 // ********************************************************************
 
 // Generated from smc_float_to_fp.slx Version 1.20 Last modified date Fri Oct 23 16:37:32 2015
-module x_i (
+module x2_i (
   input clk,
   input GlobalEnable1,
   input GlobalReset,
@@ -224,7 +224,7 @@ wire [31:0] N_5;
 wire GlobalResetSel;
   wire GlobalEnable1;
   assign GlobalEnable1 = 1;
-    x_i  myx_i (
+    x2_i  myx_i (
       .clk(clk),
       .GlobalEnable1(GlobalEnable1),
       .GlobalReset(GlobalResetSel),

@@ -11,10 +11,7 @@
 ///////////////////////////////////////////////////////////////////////
 
 module NLC_4sec_10th_1ch(
-	o_state,
-	o_test,
-	o_test2,
-	o_accum,
+
 	//System clock and reset
 	clk,
 	reset,
@@ -97,11 +94,7 @@ module NLC_4sec_10th_1ch(
 
 ///////////////////////////////////////////////////////////////////////
 //Input & Output
-	
-	output [2:0] o_state;
-	output [31:0] o_test;
-	output [31:0] o_test2;
-	output [31:0] o_accum;
+
 	//System clock and reset
 	input clk;
 	input reset;
@@ -216,7 +209,6 @@ module NLC_4sec_10th_1ch(
 	
 	//Convert x to smc
 	wire [31:0] x_new_w;
-	reg [31:0] x_new_r;
 	wire convert_to_smc_out_valid_w;
 	reg [20:0] in_fp_to_smc_r;
 	reg fp_to_smc_in_valid_r;
@@ -234,39 +226,33 @@ module NLC_4sec_10th_1ch(
 	reg mul_in_valid_r;
 	reg [31:0] in_mul_x_r;
 	reg [31:0] in_mul_y_r;
-	reg [31:0] out_mul_z_r;
 
 	//Adder
 	wire add_out_valid_w;
 	reg add_in_valid_r;
 	reg [31:0] in_add_x_r;
 	reg [31:0] in_add_y_r;
-	reg [31:0] out_add_z_r;
 	wire [31:0] out_add_z_w;
 	
 	//Parameters
-	parameter S0 = 3'b000; //wait for x input 
-	parameter S1 = 3'b001; //fp to smc conversion for x
-	parameter S2 = 3'b010; //precondition x -> add -mean
-	parameter S3 = 3'b011; //precondition x -> multiply 1/std
-	parameter S4 = 3'b100; //multiple x with sum
-	parameter S5 = 3'b101; //add sum to coeff
-	parameter S6 = 3'b110; //accumulate
-	parameter S7 = 3'b111; //convert y to fp
+	parameter S0 = 4'b0000; //wait for x input 
+	parameter S1 = 4'b0001; //fp to smc conversion for x
+	parameter S2 = 4'b0010; //precondition x -> add -mean
+	parameter S3 = 4'b0011; //precondition x -> multiply 1/std
+	parameter S4 = 4'b0100; //multiple x with sum
+	parameter S5 = 4'b0101; //add sum to coeff
+	parameter S6 = 4'b0110; //accumulate
+	parameter S7 = 4'b0111; //convert y to fp
+	parameter S8 = 4'b1000; //convert y to fp
 	
 	parameter order = 4'd10;
 	
 	//States
-	reg [2:0] state;
-	reg [2:0] next_state;
+	reg [3:0] state;
+	reg [3:0] next_state;
 	
 	reg [20:0] abs_x;
 	reg [31:0] i_x_r;
-	
-	assign o_state = state;
-	assign o_test = in_add_y_r;
-	assign o_test2 = in_add_x_r;
-	assign o_accum = out_add_z_w;
 
 /////////////////////////////////////////////////////////////////////////
 //Convert input x_adc to smc floating point
@@ -314,146 +300,116 @@ smc_float_adder add(
 	.srdyo_o(add_out_valid_w)
 );
 
-/////////////////////////////////////////////////////////////////////////////
-//Next state logic
-integer x_conditioned_ready;
 always @(*) begin
 	case(state) 
 		S0: begin
 			out_enable_r = 1'b0;
 			loops_taken_r = 0;
-			accumulator_r = 32'b00000000000000000000000000000000;
-			x_conditioned_ready = 0;
+			accumulator_r = 32'd0;
 			fp_to_smc_in_valid_r = 1'b0;
 			smc_to_fp_in_valid_r = 1'b0;
 			add_in_valid_r = 1'b0;
 			mul_in_valid_r = 1'b0;
-			if(srdyi == 1'b1) begin//convert x to smc 
+			if(srdyi == 1'b1)
+				in_enable_r = 1'b1;
+			if(in_enable_r == 1'b1) begin//convert x to smc 
 				next_state = S1;
-				in_fp_to_smc_r = x_adc;
-				fp_to_smc_in_valid_r = srdyi;
 			end
 			else
 				next_state = S0;
 		end
-		S1: begin //when output ready, send to adder
+		S1: begin
+			next_state = S2;
+			in_fp_to_smc_r = i_x_r;
+			fp_to_smc_in_valid_r = 1'b1;
+		end
+		S2: begin //when output ready, send to adder
 			if(convert_to_smc_out_valid_w == 1'b1) begin
-				next_state = S2;
-				x_new_r = x_new_w;
-				in_add_x_r = x_new_r;
-				in_add_y_r = mean_r;
-				add_in_valid_r = convert_to_smc_out_valid_w;
-			end
-			else begin
-				next_state = S1;
-			end
-		end
-		S2: begin //when adder output ready, send to multiplier
-			if(add_out_valid_w == 1'b1) begin
 				next_state = S3;
-				out_add_z_r = out_add_z_w;
-				in_mul_x_r = out_add_z_r;
-				in_mul_y_r = std_r;
-				mul_in_valid_r = add_out_valid_w;
+				in_add_x_r = x_new_w;
+				in_add_y_r = mean_r;
+				add_in_valid_r = 1'b1;
 			end
 			else begin
 				next_state = S2;
+				fp_to_smc_in_valid_r = 1'b0;
 			end
 		end
-		S3: begin //when multiplier output ready, send back to multiplier with accumulator
-			if(multiply_out_valid_w == 1'b1) begin
+		S3: begin //when adder output ready, send to multiplier
+			if(add_out_valid_w == 1'b1) begin
 				next_state = S4;
-				if(x_conditioned_ready == 1'b0)
-					x_new_final_r = out_mul_z_w;
-				else
-					x_conditioned_ready = x_conditioned_ready + 1;
-				in_mul_x_r = x_new_final_r;
-				in_mul_y_r = accumulator_r;
-				mul_in_valid_r = multiply_out_valid_w;
+				in_mul_x_r = out_add_z_w;
+				in_mul_y_r = std_r;
+				mul_in_valid_r = 1'b1;
 			end
 			else begin
-				next_state = S3;	
+				next_state = S3;
+				add_in_valid_r = 1'b0;
 			end
 		end
-		//S4: begin
-		//	next_state = S5;
-		//	loops_taken_r = loops_taken_r + 1;
-		//end
-		S4: begin //multiply x and current accumulator
-			//if(loops_taken_r == 0)
-			//	next_state = S5;
+		S4: begin //when multiplier output ready, send back to multiplier with accumulator
 			if(multiply_out_valid_w == 1'b1) begin
 				next_state = S5;
-				loops_taken_r = loops_taken_r + 1;
-				if(loops_taken_r == 1) begin
-					out_mul_z_r = 32'b00000000000000000000000000000000;
-					in_add_x_r = out_mul_z_r;
-					case(loops_taken_r)
-						1: in_add_y_r = coeffs10_r;
-						2: in_add_y_r = coeffs9_r;
-						3: in_add_y_r = coeffs8_r;
-						4: in_add_y_r = coeffs7_r;
-						5: in_add_y_r = coeffs6_r;
-						6: in_add_y_r = coeffs5_r;
-						7: in_add_y_r = coeffs4_r;
-						8: in_add_y_r = coeffs3_r;
-						9: in_add_y_r = coeffs2_r;
-						10: in_add_y_r = coeffs1_r;
-						11: in_add_y_r = coeffs0_r;
-						default: in_add_y_r = 0;
-					endcase
-					add_in_valid_r = multiply_out_valid_w;
-				end
-				else begin
-					out_mul_z_r = out_mul_z_w;
-					in_add_x_r = out_mul_z_r;
-					case(loops_taken_r)
-						1: in_add_y_r = coeffs10_r;
-						2: in_add_y_r = coeffs9_r;
-						3: in_add_y_r = coeffs8_r;
-						4: in_add_y_r = coeffs7_r;
-						5: in_add_y_r = coeffs6_r;
-						6: in_add_y_r = coeffs5_r;
-						7: in_add_y_r = coeffs4_r;
-						8: in_add_y_r = coeffs3_r;
-						9: in_add_y_r = coeffs2_r;
-						10: in_add_y_r = coeffs1_r;
-						11: in_add_y_r = coeffs0_r;
-						default: in_add_y_r = 0;
-					endcase
-					add_in_valid_r = multiply_out_valid_w;
-				end
+				x_new_final_r = out_mul_z_w;
+				in_mul_x_r = x_new_final_r;
+				in_mul_y_r = accumulator_r;
+				mul_in_valid_r = 1'b1;
 			end
 			else begin
 				next_state = S4;
+				mul_in_valid_r = 1'b0;
 			end
 		end
-		S5: begin //add coeff to product
+		S5: begin
+			next_state = S6;
+			loops_taken_r = loops_taken_r + 1;
+			mul_in_valid_r = 1'b0;
+		end
+		S6: begin //multiply x and current accumulator
+			if(multiply_out_valid_w == 1'b1) begin
+				next_state = S7;
+				in_add_x_r = out_mul_z_w;
+				case(loops_taken_r)
+					1: in_add_y_r = coeffs10_r;
+					2: in_add_y_r = coeffs9_r;
+					3: in_add_y_r = coeffs8_r;
+					4: in_add_y_r = coeffs7_r;
+					5: in_add_y_r = coeffs6_r;
+					6: in_add_y_r = coeffs5_r;
+					7: in_add_y_r = coeffs4_r;
+					8: in_add_y_r = coeffs3_r;
+					9: in_add_y_r = coeffs2_r;
+					10: in_add_y_r = coeffs1_r;
+					11: in_add_y_r = coeffs0_r;
+					default: in_add_y_r = 0;
+				endcase
+				add_in_valid_r = 1'b1;
+			end
+			else begin
+				next_state = S6;
+			end
+		end
+		S7: begin //add coeff to product
 			if(add_out_valid_w == 1'b1) begin
-				//next_state = S7;
-				//out_add_z_r = out_add_z_w;
 				accumulator_r = out_add_z_w;
-				//add_in_valid_r = 1'b0;
 				if(loops_taken_r > order) begin
-					next_state = S6;
-					//out_smc_to_fp_r = out_smc_to_fp_w;
-					//out_r = out_smc_to_fp_r;
-					//smc_to_fp_in_valid_r = 1'b0;
+					next_state = S8;
 					in_smc_to_fp_r = accumulator_r;	
-					smc_to_fp_in_valid_r = add_out_valid_w;
+					smc_to_fp_in_valid_r = 1'b1;
 				end
 				else begin
 					next_state = S5;
 					in_mul_x_r = x_new_final_r;
 					in_mul_y_r = accumulator_r;
-					mul_in_valid_r = add_out_valid_w;
+					mul_in_valid_r = 1'b1;
 				end
 			end
 			else begin
-				next_state = S6;	
+				next_state = S7;	
+				add_in_valid_r = 1'b0;
 			end
 		end
-		S6: begin
+		S8: begin
 			if(convert_to_fp_out_valid_w == 1'b1) begin
 				out_r = out_smc_to_fp_w;
 				out_enable_r = 1'b1;
@@ -461,21 +417,21 @@ always @(*) begin
 				in_enable_r = 1'b0;
 			end
 			else
-				next_state = S6;
+				next_state = S8;
+				smc_to_fp_in_valid_r = 1'b0;
 		end
-
-	endcase
+		default: next_state = S0; //Should never hit this case
+		endcase
 end
-
 ////////////////////////////////////////////////////////////////////////////
 //Determine section
 always @(*) begin
-	//i_x_r = x_adc;
 	//Get abs of x_adc
 	if(srdyi == 1'b1) begin
+		i_x_r = x_adc;
 		if(i_x_r[20] == 1'b1)
-			//abs_x = -i_x_r;
-			abs_x = {1'b0, ~i_x_r} + 1;
+			abs_x = -i_x_r;
+			//abs_x = {1'b0, ~i_x_r} + 1;
 		else
 			abs_x = i_x_r;
 		
@@ -540,77 +496,25 @@ always @(*) begin
 			mean_r = neg_mean_1;
 			std_r = recip_stdev_1;
 		end
+		else begin //Should never hit this case
+			coeffs0_r = 32'd0;
+			coeffs1_r = 32'd0;
+			coeffs2_r = 32'd0;
+			coeffs3_r = 32'd0;
+			coeffs4_r = 32'd0;
+			coeffs5_r = 32'd0;
+			coeffs6_r = 32'd0;
+			coeffs7_r = 32'd0;
+			coeffs8_r = 32'd0;
+			coeffs9_r = 32'd0;
+			coeffs10_r = 32'd0;
+			mean_r = 32'd0;
+			std_r = 32'd0;
+		end			
 	end
+	else
+		i_x_r = i_x_r;
 end
-
-///////////////////////////////////////////////////////////////////////////
-//State logic
-/*
-always @(state) begin
-	case(state) 
-		S0: begin //initial state
-			out_enable_r = 1'b0;
-			loops_taken_r = 0;
-			accumulator_r = 32'b00000000000000000000000000000000;
-
-			fp_to_smc_in_valid_r = 1'b0;
-			smc_to_fp_in_valid_r = 1'b0;
-			add_in_valid_r = 1'b0;
-			mul_in_valid_r = 1'b0;
-		end
-		S1: begin //convert x from fp to smc
-			in_fp_to_smc_r = i_x_r;
-			fp_to_smc_in_valid_r = 1'b1;
-		end
-		S2: begin //add -mean to x
-			in_add_x_r = x_new_r;
-			in_add_y_r = mean_r;
-			add_in_valid_r = 1'b1;
-		end
-		S3: begin //multiply 1/std and x-mean
-			in_mul_x_r = out_add_z_r;
-			in_mul_y_r = std_r;
-			mul_in_valid_r = 1'b1;
-		end
-		S4: begin //multiple current sum and x
-			if(loops_taken_r == 0) begin
-				out_mul_z_r = 32'b00000000000000000000000000000000;
-			end
-			else begin
-				in_mul_x_r = x_new_final_r;
-				in_mul_y_r = accumulator_r;
-				mul_in_valid_r = 1'b1;
-			end
-		end
-		S5: begin //add coeff to product
-			in_add_x_r = out_mul_z_r;
-			loops_taken_r = loops_taken_r + 1;
-			case(loops_taken_r)
-				1: in_add_y_r = coeffs10_r;
-				2: in_add_y_r = coeffs9_r;
-				3: in_add_y_r = coeffs8_r;
-				4: in_add_y_r = coeffs7_r;
-				5: in_add_y_r = coeffs6_r;
-				6: in_add_y_r = coeffs5_r;
-				7: in_add_y_r = coeffs4_r;
-				8: in_add_y_r = coeffs3_r;
-				9: in_add_y_r = coeffs2_r;
-				10: in_add_y_r = coeffs1_r;
-				11: in_add_y_r = coeffs0_r;
-				default: in_add_y_r = 0;
-			endcase
-			add_in_valid_r = 1'b1;
-		end
-		S6: begin 
-			accumulator_r = out_add_z_r;
-			if(loops_taken_r > order) begin
-				in_smc_to_fp_r = accumulator_r;
-				smc_to_fp_in_valid_r = 1'b1;
-			end
-		end
-	endcase
-end
-*/
 
 ////////////////////////////////////////////////////////////////////////////////
 //At clock edge
@@ -619,25 +523,11 @@ always @(posedge clk) begin
 	if(reset == 1'b1) begin
 		rst <= reset;
 		state <= S0;
-		out_enable_r = 1'b0;
-		loops_taken_r = 0;
-		accumulator_r = 32'b00000000000000000000000000000000;
-		fp_to_smc_in_valid_r = 1'b0;
-		smc_to_fp_in_valid_r = 1'b0;
-		add_in_valid_r = 1'b0;
-		mul_in_valid_r = 1'b0;
-		if(srdyi == 1'b1) begin
-			i_x_r <= x_adc;
-			in_enable_r <= srdyi;
-		end
+		//out_r = 32'd0;
 	end
 	else begin
 		rst <= reset;
 		state <= next_state;
-		if(srdyi == 1'b1) begin
-			i_x_r <= x_adc;
-			in_enable_r <= srdyi;
-		end
 	end	
 end
 
