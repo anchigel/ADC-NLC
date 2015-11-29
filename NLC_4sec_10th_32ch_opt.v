@@ -2268,44 +2268,43 @@ module NLC_4sec_10th_32ch_opt(
 	input clk;
 	input reset;
 	
-	//ADC output
-	output [20:0] x_lin_ch1;
-	output [20:0] x_lin_ch2;
-	output [20:0] x_lin_ch3;
-	output [20:0] x_lin_ch4;
-	output [20:0] x_lin_ch5;
-	output [20:0] x_lin_ch6;
-	output [20:0] x_lin_ch7;
-	output [20:0] x_lin_ch8;
-	output [20:0] x_lin_ch9;
-	output [20:0] x_lin_ch10;
-	output [20:0] x_lin_ch11;
-	output [20:0] x_lin_ch12;
-	output [20:0] x_lin_ch13;
-	output [20:0] x_lin_ch14;
-	output [20:0] x_lin_ch15;
-	output [20:0] x_lin_ch16;
-	output [20:0] x_lin_ch17;
-	output [20:0] x_lin_ch18;
-	output [20:0] x_lin_ch19;
-	output [20:0] x_lin_ch20;
-	output [20:0] x_lin_ch21;
-	output [20:0] x_lin_ch22;
-	output [20:0] x_lin_ch23;
-	output [20:0] x_lin_ch24;
-	output [20:0] x_lin_ch25;
-	output [20:0] x_lin_ch26;
-	output [20:0] x_lin_ch27;
-	output [20:0] x_lin_ch28;
-	output [20:0] x_lin_ch29;
-	output [20:0] x_lin_ch30;
-	output [20:0] x_lin_ch31;
-	output [20:0] x_lin_ch32;
-	output srdyi;
+	//Output
+	output reg [20:0] x_lin_ch1;
+	output reg [20:0] x_lin_ch2;
+	output reg [20:0] x_lin_ch3;
+	output reg [20:0] x_lin_ch4;
+	output reg [20:0] x_lin_ch5;
+	output reg [20:0] x_lin_ch6;
+	output reg [20:0] x_lin_ch7;
+	output reg [20:0] x_lin_ch8;
+	output reg [20:0] x_lin_ch9;
+	output reg [20:0] x_lin_ch10;
+	output reg [20:0] x_lin_ch11;
+	output reg [20:0] x_lin_ch12;
+	output reg [20:0] x_lin_ch13;
+	output reg [20:0] x_lin_ch14;
+	output reg [20:0] x_lin_ch15;
+	output reg [20:0] x_lin_ch16;
+	output reg [20:0] x_lin_ch17;
+	output reg [20:0] x_lin_ch18;
+	output reg [20:0] x_lin_ch19;
+	output reg [20:0] x_lin_ch20;
+	output reg [20:0] x_lin_ch21;
+	output reg [20:0] x_lin_ch22;
+	output reg [20:0] x_lin_ch23;
+	output reg [20:0] x_lin_ch24;
+	output reg [20:0] x_lin_ch25;
+	output reg [20:0] x_lin_ch26;
+	output reg [20:0] x_lin_ch27;
+	output reg [20:0] x_lin_ch28;
+	output reg [20:0] x_lin_ch29;
+	output reg [20:0] x_lin_ch30;
+	output reg [20:0] x_lin_ch31;
+	output reg [20:0] x_lin_ch32;
+	output reg srdyo;
 	
-	//NLC output
-	output srdyo; 
-
+	//Input
+	input srdyi;
 	input [20:0] x_adc_ch1; 
 	input [20:0] x_adc_ch2; 
 	input [20:0] x_adc_ch3; 
@@ -5181,72 +5180,7 @@ module NLC_4sec_10th_32ch_opt(
 	reg [31:0] x_lin_ch31_r; 
 	reg [31:0] x_lin_ch32_r;
 	
-	wire [31:0] x_lin_ch1_w; 
-	wire [31:0] x_lin_ch2_w; 
-	wire [31:0] x_lin_ch3_w; 
-	wire [31:0] x_lin_ch4_w; 
-	wire [31:0] x_lin_ch5_w; 
-	wire [31:0] x_lin_ch6_w; 
-	wire [31:0] x_lin_ch7_w; 
-	wire [31:0] x_lin_ch8_w; 
-	wire [31:0] x_lin_ch9_w; 
-	wire [31:0] x_lin_ch10_w; 
-	wire [31:0] x_lin_ch11_w; 
-	wire [31:0] x_lin_ch12_w; 
-	wire [31:0] x_lin_ch13_w; 
-	wire [31:0] x_lin_ch14_w; 
-	wire [31:0] x_lin_ch15_w; 
-	wire [31:0] x_lin_ch16_w; 
-	wire [31:0] x_lin_ch17_w; 
-	wire [31:0] x_lin_ch18_w; 
-	wire [31:0] x_lin_ch19_w; 
-	wire [31:0] x_lin_ch20_w; 
-	wire [31:0] x_lin_ch21_w; 
-	wire [31:0] x_lin_ch22_w; 
-	wire [31:0] x_lin_ch23_w; 
-	wire [31:0] x_lin_ch24_w; 
-	wire [31:0] x_lin_ch25_w; 
-	wire [31:0] x_lin_ch26_w; 
-	wire [31:0] x_lin_ch27_w; 
-	wire [31:0] x_lin_ch28_w; 
-	wire [31:0] x_lin_ch29_w; 
-	wire [31:0] x_lin_ch30_w; 
-	wire [31:0] x_lin_ch31_w; 
-	wire [31:0] x_lin_ch32_w;
-	
-	assign x_lin_ch1_w = x_lin_ch1_r; 
-	assign x_lin_ch2_w = x_lin_ch2_r; 
-	assign x_lin_ch3_w = x_lin_ch3_r; 
-	assign x_lin_ch4_w = x_lin_ch4_r; 
-	assign x_lin_ch5_w = x_lin_ch5_r; 
-	assign x_lin_ch6_w = x_lin_ch6_r; 
-	assign x_lin_ch7_w = x_lin_ch7_r; 
-	assign x_lin_ch8_w = x_lin_ch8_r; 
-	assign x_lin_ch9_w = x_lin_ch9_r; 
-	assign x_lin_ch10_w = x_lin_ch10_r; 
-	assign x_lin_ch11_w = x_lin_ch11_r; 
-	assign x_lin_ch12_w = x_lin_ch12_r; 
-	assign x_lin_ch13_w = x_lin_ch13_r; 
-	assign x_lin_ch14_w = x_lin_ch14_r; 
-	assign x_lin_ch15_w = x_lin_ch15_r; 
-	assign x_lin_ch16_w = x_lin_ch16_r; 
-	assign x_lin_ch17_w = x_lin_ch17_r; 
-	assign x_lin_ch18_w = x_lin_ch18_r; 
-	assign x_lin_ch19_w = x_lin_ch19_r; 
-	assign x_lin_ch20_w = x_lin_ch20_r; 
-	assign x_lin_ch21_w = x_lin_ch21_r; 
-	assign x_lin_ch22_w = x_lin_ch22_r; 
-	assign x_lin_ch23_w = x_lin_ch23_r; 
-	assign x_lin_ch24_w = x_lin_ch24_r; 
-	assign x_lin_ch25_w = x_lin_ch25_r; 
-	assign x_lin_ch26_w = x_lin_ch26_r; 
-	assign x_lin_ch27_w = x_lin_ch27_r; 
-	assign x_lin_ch28_w = x_lin_ch28_r; 
-	assign x_lin_ch29_w = x_lin_ch29_r; 
-	assign x_lin_ch30_w = x_lin_ch30_r; 
-	assign x_lin_ch31_w = x_lin_ch31_r; 
-	assign x_lin_ch32_w = x_lin_ch32_r;
-	
+	/*
 	//Assign output values
 	assign x_lin_ch1 = x_lin_ch1_r; 
 	assign x_lin_ch2 = x_lin_ch2_r; 
@@ -5280,13 +5214,15 @@ module NLC_4sec_10th_32ch_opt(
 	assign x_lin_ch30 = x_lin_ch30_r; 
 	assign x_lin_ch31 = x_lin_ch31_r; 
 	assign x_lin_ch32 = x_lin_ch32_r;
-	
-	reg in_enable_r;
-	wire in_enable_w;
-	assign in_enable_w = in_enable_r;
-	
+	*/
+	reg in_enable_r;	
 	reg out_enable_r;
-	assign srdyo = out_enable_r;
+	//assign srdyo = out_enable_r;
+	
+	reg output_ready_1;
+	reg output_ready_2;
+	reg output_ready_3;
+	reg output_ready_4;
 		
 /////////////////////////////////////////////////////////////
 //8 block - 4 channel interleaving
@@ -5963,40 +5899,10 @@ always @(*) begin
 	case(state)
 		S0: begin
 			out_enable_r = 1'b0;
-	
-			//Initialize output values
-			x_lin_ch1_r = 21'd0; 
-			x_lin_ch2_r = 21'd0; 
-			x_lin_ch3_r = 21'd0; 
-			x_lin_ch4_r = 21'd0; 
-			x_lin_ch5_r = 21'd0; 
-			x_lin_ch6_r = 21'd0; 
-			x_lin_ch7_r = 21'd0; 
-			x_lin_ch8_r = 21'd0; 
-			x_lin_ch9_r = 21'd0; 
-			x_lin_ch10_r = 21'd0; 
-			x_lin_ch11_r = 21'd0; 
-			x_lin_ch12_r = 21'd0; 
-			x_lin_ch13_r = 21'd0; 
-			x_lin_ch14_r = 21'd0; 
-			x_lin_ch15_r = 21'd0; 
-			x_lin_ch16_r = 21'd0; 
-			x_lin_ch17_r = 21'd0; 
-			x_lin_ch18_r = 21'd0; 
-			x_lin_ch19_r = 21'd0; 
-			x_lin_ch20_r = 21'd0; 
-			x_lin_ch21_r = 21'd0; 
-			x_lin_ch22_r = 21'd0; 
-			x_lin_ch23_r = 21'd0; 
-			x_lin_ch24_r = 21'd0; 
-			x_lin_ch25_r = 21'd0; 
-			x_lin_ch26_r = 21'd0; 
-			x_lin_ch27_r = 21'd0; 
-			x_lin_ch28_r = 21'd0; 
-			x_lin_ch29_r = 21'd0; 
-			x_lin_ch30_r = 21'd0; 
-			x_lin_ch31_r = 21'd0; 
-			x_lin_ch32_r = 21'd0;
+			output_ready_1 = 1'b0;
+			output_ready_2 = 1'b0;
+			output_ready_3 = 1'b0;
+			output_ready_4 = 1'b0;
 			
 			//Channel 1
 			//Reciprocal standard deviation for the centered and scaled fit
@@ -6562,10 +6468,6 @@ always @(*) begin
 			x_adc_ch7_in_r = 21'd0;
 			x_adc_ch8_in_r = 21'd0;
 			
-			if(srdyi == 1'b1)
-				in_enable_r = 1'b1;
-			else
-				in_enable_r = in_enable_w;
 			if(in_enable_r == 1'b1) begin
 				next_state = S1;
 			end
@@ -6574,42 +6476,13 @@ always @(*) begin
 			end
 		end
 		S1: begin
-			x_lin_ch1_r = x_lin_ch1_w; 
-			x_lin_ch2_r = x_lin_ch2_w; 
-			x_lin_ch3_r = x_lin_ch3_w; 
-			x_lin_ch4_r = x_lin_ch4_w; 
-			x_lin_ch5_r = x_lin_ch5_w; 
-			x_lin_ch6_r = x_lin_ch6_w; 
-			x_lin_ch7_r = x_lin_ch7_w; 
-			x_lin_ch8_r = x_lin_ch8_w; 
-			x_lin_ch9_r = x_lin_ch9_w; 
-			x_lin_ch10_r = x_lin_ch10_w; 
-			x_lin_ch11_r = x_lin_ch11_w; 
-			x_lin_ch12_r = x_lin_ch12_w; 
-			x_lin_ch13_r = x_lin_ch13_w; 
-			x_lin_ch14_r = x_lin_ch14_w; 
-			x_lin_ch15_r = x_lin_ch15_w; 
-			x_lin_ch16_r = x_lin_ch16_w; 
-			x_lin_ch17_r = x_lin_ch17_w; 
-			x_lin_ch18_r = x_lin_ch18_w; 
-			x_lin_ch19_r = x_lin_ch19_w; 
-			x_lin_ch20_r = x_lin_ch20_w; 
-			x_lin_ch21_r = x_lin_ch21_w; 
-			x_lin_ch22_r = x_lin_ch22_w; 
-			x_lin_ch23_r = x_lin_ch23_w; 
-			x_lin_ch24_r = x_lin_ch24_w; 
-			x_lin_ch25_r = x_lin_ch25_w; 
-			x_lin_ch26_r = x_lin_ch26_w; 
-			x_lin_ch27_r = x_lin_ch27_w; 
-			x_lin_ch28_r = x_lin_ch28_w; 
-			x_lin_ch29_r = x_lin_ch29_w; 
-			x_lin_ch30_r = x_lin_ch30_w; 
-			x_lin_ch31_r = x_lin_ch31_w; 
-			x_lin_ch32_r = x_lin_ch32_w;
-		
 			out_enable_r = 1'b0;
-			in_enable_r = 1'b0;
+			output_ready_1 = 1'b0;
+			output_ready_2 = 1'b0;
+			output_ready_3 = 1'b0;
+			output_ready_4 = 1'b0;
 			next_state = S2;
+			
 			//Channel 1
 			x_adc_ch1_in_r = x_adc_ch1_r;
 			
@@ -7174,54 +7047,17 @@ always @(*) begin
 		end
 		S2: begin
 			out_enable_r = 1'b0;
-			in_enable_r = 1'b0;
+			output_ready_2 = 1'b0;
+			output_ready_3 = 1'b0;
+			output_ready_4 = 1'b0;
 			if(srdyo_1_r == 1'b1) begin
 				next_state = S3;
-				x_lin_ch1_r = x_lin_ch1_out_w;
-				x_lin_ch2_r = x_lin_ch2_out_w;
-				x_lin_ch3_r = x_lin_ch3_out_w;
-				x_lin_ch4_r = x_lin_ch4_out_w;
-				x_lin_ch5_r = x_lin_ch5_out_w;
-				x_lin_ch6_r = x_lin_ch6_out_w;
-				x_lin_ch7_r = x_lin_ch7_out_w;
-				x_lin_ch8_r = x_lin_ch8_out_w;
+				output_ready_1 = 1'b1;
 			end
 			else begin
 				next_state = S2;
-				x_lin_ch1_r = 21'd0;
-				x_lin_ch2_r = 21'd0;
-				x_lin_ch3_r = 21'd0;
-				x_lin_ch4_r = 21'd0;
-				x_lin_ch5_r = 21'd0;
-				x_lin_ch6_r = 21'd0;
-				x_lin_ch7_r = 21'd0;
-				x_lin_ch8_r = 21'd0;
+				output_ready_1 =1'b0;
 			end
-			
-			x_lin_ch9_r = x_lin_ch9_w; 
-			x_lin_ch10_r = x_lin_ch10_w; 
-			x_lin_ch11_r = x_lin_ch11_w; 
-			x_lin_ch12_r = x_lin_ch12_w; 
-			x_lin_ch13_r = x_lin_ch13_w; 
-			x_lin_ch14_r = x_lin_ch14_w; 
-			x_lin_ch15_r = x_lin_ch15_w; 
-			x_lin_ch16_r = x_lin_ch16_w; 
-			x_lin_ch17_r = x_lin_ch17_w; 
-			x_lin_ch18_r = x_lin_ch18_w; 
-			x_lin_ch19_r = x_lin_ch19_w; 
-			x_lin_ch20_r = x_lin_ch20_w; 
-			x_lin_ch21_r = x_lin_ch21_w; 
-			x_lin_ch22_r = x_lin_ch22_w; 
-			x_lin_ch23_r = x_lin_ch23_w; 
-			x_lin_ch24_r = x_lin_ch24_w; 
-			x_lin_ch25_r = x_lin_ch25_w; 
-			x_lin_ch26_r = x_lin_ch26_w; 
-			x_lin_ch27_r = x_lin_ch27_w; 
-			x_lin_ch28_r = x_lin_ch28_w; 
-			x_lin_ch29_r = x_lin_ch29_w; 
-			x_lin_ch30_r = x_lin_ch30_w; 
-			x_lin_ch31_r = x_lin_ch31_w; 
-			x_lin_ch32_r = x_lin_ch32_w;
 			
 			//Channel 1
 			x_adc_ch1_in_r = x_adc_ch1_r;
@@ -7787,41 +7623,10 @@ always @(*) begin
 		end
 		S3: begin
 			out_enable_r = 1'b0;
-			in_enable_r = 1'b0;
-			
-			x_lin_ch1_r = x_lin_ch1_w; 
-			x_lin_ch2_r = x_lin_ch2_w; 
-			x_lin_ch3_r = x_lin_ch3_w; 
-			x_lin_ch4_r = x_lin_ch4_w; 
-			x_lin_ch5_r = x_lin_ch5_w; 
-			x_lin_ch6_r = x_lin_ch6_w; 
-			x_lin_ch7_r = x_lin_ch7_w; 
-			x_lin_ch8_r = x_lin_ch8_w; 
-			x_lin_ch9_r = x_lin_ch9_w; 
-			x_lin_ch10_r = x_lin_ch10_w; 
-			x_lin_ch11_r = x_lin_ch11_w; 
-			x_lin_ch12_r = x_lin_ch12_w; 
-			x_lin_ch13_r = x_lin_ch13_w; 
-			x_lin_ch14_r = x_lin_ch14_w; 
-			x_lin_ch15_r = x_lin_ch15_w; 
-			x_lin_ch16_r = x_lin_ch16_w; 
-			x_lin_ch17_r = x_lin_ch17_w; 
-			x_lin_ch18_r = x_lin_ch18_w; 
-			x_lin_ch19_r = x_lin_ch19_w; 
-			x_lin_ch20_r = x_lin_ch20_w; 
-			x_lin_ch21_r = x_lin_ch21_w; 
-			x_lin_ch22_r = x_lin_ch22_w; 
-			x_lin_ch23_r = x_lin_ch23_w; 
-			x_lin_ch24_r = x_lin_ch24_w; 
-			x_lin_ch25_r = x_lin_ch25_w; 
-			x_lin_ch26_r = x_lin_ch26_w; 
-			x_lin_ch27_r = x_lin_ch27_w; 
-			x_lin_ch28_r = x_lin_ch28_w; 
-			x_lin_ch29_r = x_lin_ch29_w; 
-			x_lin_ch30_r = x_lin_ch30_w; 
-			x_lin_ch31_r = x_lin_ch31_w; 
-			x_lin_ch32_r = x_lin_ch32_w;
-			
+			output_ready_1 = 1'b0;
+			output_ready_2 = 1'b0;
+			output_ready_3 = 1'b0;
+			output_ready_4 = 1'b0;
 			next_state = S4;
 			//Channel 1
 			x_adc_ch1_in_r = x_adc_ch9_r;
@@ -8386,54 +8191,17 @@ always @(*) begin
 		end
 		S4: begin
 			out_enable_r = 1'b0;
-			in_enable_r = 1'b0;
+			output_ready_1 = 1'b0;
+			output_ready_3 = 1'b0;
+			output_ready_4 = 1'b0;
 			if(srdyo_1_r == 1'b1) begin
 				next_state = S5;
-				x_lin_ch9_r = x_lin_ch1_out_w;
-				x_lin_ch10_r = x_lin_ch2_out_w;
-				x_lin_ch11_r = x_lin_ch3_out_w;
-				x_lin_ch12_r = x_lin_ch4_out_w;
-				x_lin_ch13_r = x_lin_ch5_out_w;
-				x_lin_ch14_r = x_lin_ch6_out_w;
-				x_lin_ch15_r = x_lin_ch7_out_w;
-				x_lin_ch16_r = x_lin_ch8_out_w;
+				output_ready_2 = 1'b1;
 			end
 			else begin
 				next_state = S4;
-				x_lin_ch9_r = 21'd0;
-				x_lin_ch10_r = 21'd0;
-				x_lin_ch11_r = 21'd0;
-				x_lin_ch12_r = 21'd0;
-				x_lin_ch13_r = 21'd0;
-				x_lin_ch14_r = 21'd0;
-				x_lin_ch15_r = 21'd0;
-				x_lin_ch16_r = 21'd0;
+				output_ready_2 = 1'b0;
 			end
-			
-			x_lin_ch1_r = x_lin_ch1_w; 
-			x_lin_ch2_r = x_lin_ch2_w; 
-			x_lin_ch3_r = x_lin_ch3_w; 
-			x_lin_ch4_r = x_lin_ch4_w; 
-			x_lin_ch5_r = x_lin_ch5_w; 
-			x_lin_ch6_r = x_lin_ch6_w; 
-			x_lin_ch7_r = x_lin_ch7_w; 
-			x_lin_ch8_r = x_lin_ch8_w; 
-			x_lin_ch17_r = x_lin_ch17_w; 
-			x_lin_ch18_r = x_lin_ch18_w; 
-			x_lin_ch19_r = x_lin_ch19_w; 
-			x_lin_ch20_r = x_lin_ch20_w; 
-			x_lin_ch21_r = x_lin_ch21_w; 
-			x_lin_ch22_r = x_lin_ch22_w; 
-			x_lin_ch23_r = x_lin_ch23_w; 
-			x_lin_ch24_r = x_lin_ch24_w; 
-			x_lin_ch25_r = x_lin_ch25_w; 
-			x_lin_ch26_r = x_lin_ch26_w; 
-			x_lin_ch27_r = x_lin_ch27_w; 
-			x_lin_ch28_r = x_lin_ch28_w; 
-			x_lin_ch29_r = x_lin_ch29_w; 
-			x_lin_ch30_r = x_lin_ch30_w; 
-			x_lin_ch31_r = x_lin_ch31_w; 
-			x_lin_ch32_r = x_lin_ch32_w;
 			
 			//Channel 1
 			x_adc_ch1_in_r = x_adc_ch9_r;
@@ -8998,40 +8766,10 @@ always @(*) begin
 		end
 		S5: begin
 			out_enable_r = 1'b0;
-			in_enable_r = 1'b0;
-		
-			x_lin_ch1_r = x_lin_ch1_w; 
-			x_lin_ch2_r = x_lin_ch2_w; 
-			x_lin_ch3_r = x_lin_ch3_w; 
-			x_lin_ch4_r = x_lin_ch4_w; 
-			x_lin_ch5_r = x_lin_ch5_w; 
-			x_lin_ch6_r = x_lin_ch6_w; 
-			x_lin_ch7_r = x_lin_ch7_w; 
-			x_lin_ch8_r = x_lin_ch8_w; 
-			x_lin_ch9_r = x_lin_ch9_w; 
-			x_lin_ch10_r = x_lin_ch10_w; 
-			x_lin_ch11_r = x_lin_ch11_w; 
-			x_lin_ch12_r = x_lin_ch12_w; 
-			x_lin_ch13_r = x_lin_ch13_w; 
-			x_lin_ch14_r = x_lin_ch14_w; 
-			x_lin_ch15_r = x_lin_ch15_w; 
-			x_lin_ch16_r = x_lin_ch16_w; 
-			x_lin_ch17_r = x_lin_ch17_w; 
-			x_lin_ch18_r = x_lin_ch18_w; 
-			x_lin_ch19_r = x_lin_ch19_w; 
-			x_lin_ch20_r = x_lin_ch20_w; 
-			x_lin_ch21_r = x_lin_ch21_w; 
-			x_lin_ch22_r = x_lin_ch22_w; 
-			x_lin_ch23_r = x_lin_ch23_w; 
-			x_lin_ch24_r = x_lin_ch24_w; 
-			x_lin_ch25_r = x_lin_ch25_w; 
-			x_lin_ch26_r = x_lin_ch26_w; 
-			x_lin_ch27_r = x_lin_ch27_w; 
-			x_lin_ch28_r = x_lin_ch28_w; 
-			x_lin_ch29_r = x_lin_ch29_w; 
-			x_lin_ch30_r = x_lin_ch30_w; 
-			x_lin_ch31_r = x_lin_ch31_w; 
-			x_lin_ch32_r = x_lin_ch32_w;
+			output_ready_1 = 1'b0;
+			output_ready_2 = 1'b0;
+			output_ready_3 = 1'b0;
+			output_ready_4 = 1'b0;
 		
 			next_state = S6;
 			//Channel 1
@@ -9597,54 +9335,17 @@ always @(*) begin
 		end
 		S6: begin
 			out_enable_r = 1'b0;
-			in_enable_r = 1'b0;
+			output_ready_1 = 1'b0;
+			output_ready_2 = 1'b0;
+			output_ready_4 = 1'b0;
 			if(srdyo_1_r == 1'b1) begin
 				next_state = S7;
-				x_lin_ch17_r = x_lin_ch1_out_w;
-				x_lin_ch18_r = x_lin_ch2_out_w;
-				x_lin_ch19_r = x_lin_ch3_out_w;
-				x_lin_ch20_r = x_lin_ch4_out_w;
-				x_lin_ch21_r = x_lin_ch5_out_w;
-				x_lin_ch22_r = x_lin_ch6_out_w;
-				x_lin_ch23_r = x_lin_ch7_out_w;
-				x_lin_ch24_r = x_lin_ch8_out_w;
+				output_ready_3 = 1'b1;
 			end
 			else begin
 				next_state = S6;
-				x_lin_ch17_r = 21'd0;
-				x_lin_ch18_r = 21'd0;
-				x_lin_ch19_r = 21'd0;
-				x_lin_ch20_r = 21'd0;
-				x_lin_ch21_r = 21'd0;
-				x_lin_ch22_r = 21'd0;
-				x_lin_ch23_r = 21'd0;
-				x_lin_ch24_r = 21'd0;
+				output_ready_3 = 1'b0;
 			end
-			
-			x_lin_ch1_r = x_lin_ch1_w; 
-			x_lin_ch2_r = x_lin_ch2_w; 
-			x_lin_ch3_r = x_lin_ch3_w; 
-			x_lin_ch4_r = x_lin_ch4_w; 
-			x_lin_ch5_r = x_lin_ch5_w; 
-			x_lin_ch6_r = x_lin_ch6_w; 
-			x_lin_ch7_r = x_lin_ch7_w; 
-			x_lin_ch8_r = x_lin_ch8_w; 
-			x_lin_ch9_r = x_lin_ch9_w; 
-			x_lin_ch10_r = x_lin_ch10_w; 
-			x_lin_ch11_r = x_lin_ch11_w; 
-			x_lin_ch12_r = x_lin_ch12_w; 
-			x_lin_ch13_r = x_lin_ch13_w; 
-			x_lin_ch14_r = x_lin_ch14_w; 
-			x_lin_ch15_r = x_lin_ch15_w; 
-			x_lin_ch16_r = x_lin_ch16_w; 
-			x_lin_ch25_r = x_lin_ch25_w; 
-			x_lin_ch26_r = x_lin_ch26_w; 
-			x_lin_ch27_r = x_lin_ch27_w; 
-			x_lin_ch28_r = x_lin_ch28_w; 
-			x_lin_ch29_r = x_lin_ch29_w; 
-			x_lin_ch30_r = x_lin_ch30_w; 
-			x_lin_ch31_r = x_lin_ch31_w; 
-			x_lin_ch32_r = x_lin_ch32_w;
 			
 			//Channel 1
 			x_adc_ch1_in_r = x_adc_ch17_r;
@@ -10209,40 +9910,10 @@ always @(*) begin
 		end
 		S7: begin
 			out_enable_r = 1'b0;
-			in_enable_r = 1'b0;
-			
-			x_lin_ch1_r = x_lin_ch1_w; 
-			x_lin_ch2_r = x_lin_ch2_w; 
-			x_lin_ch3_r = x_lin_ch3_w; 
-			x_lin_ch4_r = x_lin_ch4_w; 
-			x_lin_ch5_r = x_lin_ch5_w; 
-			x_lin_ch6_r = x_lin_ch6_w; 
-			x_lin_ch7_r = x_lin_ch7_w; 
-			x_lin_ch8_r = x_lin_ch8_w; 
-			x_lin_ch9_r = x_lin_ch9_w; 
-			x_lin_ch10_r = x_lin_ch10_w; 
-			x_lin_ch11_r = x_lin_ch11_w; 
-			x_lin_ch12_r = x_lin_ch12_w; 
-			x_lin_ch13_r = x_lin_ch13_w; 
-			x_lin_ch14_r = x_lin_ch14_w; 
-			x_lin_ch15_r = x_lin_ch15_w; 
-			x_lin_ch16_r = x_lin_ch16_w; 
-			x_lin_ch17_r = x_lin_ch17_w; 
-			x_lin_ch18_r = x_lin_ch18_w; 
-			x_lin_ch19_r = x_lin_ch19_w; 
-			x_lin_ch20_r = x_lin_ch20_w; 
-			x_lin_ch21_r = x_lin_ch21_w; 
-			x_lin_ch22_r = x_lin_ch22_w; 
-			x_lin_ch23_r = x_lin_ch23_w; 
-			x_lin_ch24_r = x_lin_ch24_w; 
-			x_lin_ch25_r = x_lin_ch25_w; 
-			x_lin_ch26_r = x_lin_ch26_w; 
-			x_lin_ch27_r = x_lin_ch27_w; 
-			x_lin_ch28_r = x_lin_ch28_w; 
-			x_lin_ch29_r = x_lin_ch29_w; 
-			x_lin_ch30_r = x_lin_ch30_w; 
-			x_lin_ch31_r = x_lin_ch31_w; 
-			x_lin_ch32_r = x_lin_ch32_w;
+			output_ready_1 = 1'b0;
+			output_ready_2 = 1'b0;
+			output_ready_3 = 1'b0;
+			output_ready_4 = 1'b0;
 			
 			next_state = S8;
 			//Channel 1
@@ -10808,54 +10479,17 @@ always @(*) begin
 		end
 		S8: begin
 			out_enable_r = 1'b0;
-			in_enable_r = 1'b0;
+			output_ready_1 = 1'b0;
+			output_ready_2 = 1'b0;
+			output_ready_3 = 1'b0;
 			if(srdyo_1_r == 1'b1) begin
 				next_state = S9;
-				x_lin_ch25_r = x_lin_ch1_out_w;
-				x_lin_ch26_r = x_lin_ch2_out_w;
-				x_lin_ch27_r = x_lin_ch3_out_w;
-				x_lin_ch28_r = x_lin_ch4_out_w;
-				x_lin_ch29_r = x_lin_ch5_out_w;
-				x_lin_ch30_r = x_lin_ch6_out_w;
-				x_lin_ch31_r = x_lin_ch7_out_w;
-				x_lin_ch32_r = x_lin_ch8_out_w;
+				output_ready_4 = 1'b1;
 			end
 			else begin
 				next_state = S8;
-				x_lin_ch25_r = 21'd0;
-				x_lin_ch26_r = 21'd0;
-				x_lin_ch27_r = 21'd0;
-				x_lin_ch28_r = 21'd0;
-				x_lin_ch29_r = 21'd0;
-				x_lin_ch30_r = 21'd0;
-				x_lin_ch31_r = 21'd0;
-				x_lin_ch32_r = 21'd0;
+				output_ready_4 = 1'b0;
 			end
-			
-			x_lin_ch1_r = x_lin_ch1_w; 
-			x_lin_ch2_r = x_lin_ch2_w; 
-			x_lin_ch3_r = x_lin_ch3_w; 
-			x_lin_ch4_r = x_lin_ch4_w; 
-			x_lin_ch5_r = x_lin_ch5_w; 
-			x_lin_ch6_r = x_lin_ch6_w; 
-			x_lin_ch7_r = x_lin_ch7_w; 
-			x_lin_ch8_r = x_lin_ch8_w; 
-			x_lin_ch9_r = x_lin_ch9_w; 
-			x_lin_ch10_r = x_lin_ch10_w; 
-			x_lin_ch11_r = x_lin_ch11_w; 
-			x_lin_ch12_r = x_lin_ch12_w; 
-			x_lin_ch13_r = x_lin_ch13_w; 
-			x_lin_ch14_r = x_lin_ch14_w; 
-			x_lin_ch15_r = x_lin_ch15_w; 
-			x_lin_ch16_r = x_lin_ch16_w; 
-			x_lin_ch17_r = x_lin_ch17_w; 
-			x_lin_ch18_r = x_lin_ch18_w; 
-			x_lin_ch19_r = x_lin_ch19_w; 
-			x_lin_ch20_r = x_lin_ch20_w; 
-			x_lin_ch21_r = x_lin_ch21_w; 
-			x_lin_ch22_r = x_lin_ch22_w; 
-			x_lin_ch23_r = x_lin_ch23_w; 
-			x_lin_ch24_r = x_lin_ch24_w; 
 			
 			srdyi_1_r = 1'b0;
 			srdyi_2_r = 1'b0;
@@ -11421,40 +11055,10 @@ always @(*) begin
 		end
 		S9: begin
 			out_enable_r = 1'b1;
-			in_enable_r = 1'b0;
-			
-			x_lin_ch1_r = x_lin_ch1_w; 
-			x_lin_ch2_r = x_lin_ch2_w; 
-			x_lin_ch3_r = x_lin_ch3_w; 
-			x_lin_ch4_r = x_lin_ch4_w; 
-			x_lin_ch5_r = x_lin_ch5_w; 
-			x_lin_ch6_r = x_lin_ch6_w; 
-			x_lin_ch7_r = x_lin_ch7_w; 
-			x_lin_ch8_r = x_lin_ch8_w; 
-			x_lin_ch9_r = x_lin_ch9_w; 
-			x_lin_ch10_r = x_lin_ch10_w; 
-			x_lin_ch11_r = x_lin_ch11_w; 
-			x_lin_ch12_r = x_lin_ch12_w; 
-			x_lin_ch13_r = x_lin_ch13_w; 
-			x_lin_ch14_r = x_lin_ch14_w; 
-			x_lin_ch15_r = x_lin_ch15_w; 
-			x_lin_ch16_r = x_lin_ch16_w; 
-			x_lin_ch17_r = x_lin_ch17_w; 
-			x_lin_ch18_r = x_lin_ch18_w; 
-			x_lin_ch19_r = x_lin_ch19_w; 
-			x_lin_ch20_r = x_lin_ch20_w; 
-			x_lin_ch21_r = x_lin_ch21_w; 
-			x_lin_ch22_r = x_lin_ch22_w; 
-			x_lin_ch23_r = x_lin_ch23_w; 
-			x_lin_ch24_r = x_lin_ch24_w; 
-			x_lin_ch25_r = x_lin_ch25_w; 
-			x_lin_ch26_r = x_lin_ch26_w; 
-			x_lin_ch27_r = x_lin_ch27_w; 
-			x_lin_ch28_r = x_lin_ch28_w; 
-			x_lin_ch29_r = x_lin_ch29_w; 
-			x_lin_ch30_r = x_lin_ch30_w; 
-			x_lin_ch31_r = x_lin_ch31_w; 
-			x_lin_ch32_r = x_lin_ch32_w;
+			output_ready_1 = 1'b0;
+			output_ready_2 = 1'b0;
+			output_ready_3 = 1'b0;
+			output_ready_4 = 1'b0;
 			
 			next_state = S0;
 			
@@ -12023,39 +11627,10 @@ always @(*) begin
 			x_adc_ch8_in_r = 21'd0;
 		end
 		default: begin //Should never get to this case
-			x_lin_ch1_r = x_lin_ch1_w; 
-			x_lin_ch2_r = x_lin_ch2_w; 
-			x_lin_ch3_r = x_lin_ch3_w; 
-			x_lin_ch4_r = x_lin_ch4_w; 
-			x_lin_ch5_r = x_lin_ch5_w; 
-			x_lin_ch6_r = x_lin_ch6_w; 
-			x_lin_ch7_r = x_lin_ch7_w; 
-			x_lin_ch8_r = x_lin_ch8_w; 
-			x_lin_ch9_r = x_lin_ch9_w; 
-			x_lin_ch10_r = x_lin_ch10_w; 
-			x_lin_ch11_r = x_lin_ch11_w; 
-			x_lin_ch12_r = x_lin_ch12_w; 
-			x_lin_ch13_r = x_lin_ch13_w; 
-			x_lin_ch14_r = x_lin_ch14_w; 
-			x_lin_ch15_r = x_lin_ch15_w; 
-			x_lin_ch16_r = x_lin_ch16_w; 
-			x_lin_ch17_r = x_lin_ch17_w; 
-			x_lin_ch18_r = x_lin_ch18_w; 
-			x_lin_ch19_r = x_lin_ch19_w; 
-			x_lin_ch20_r = x_lin_ch20_w; 
-			x_lin_ch21_r = x_lin_ch21_w; 
-			x_lin_ch22_r = x_lin_ch22_w; 
-			x_lin_ch23_r = x_lin_ch23_w; 
-			x_lin_ch24_r = x_lin_ch24_w; 
-			x_lin_ch25_r = x_lin_ch25_w; 
-			x_lin_ch26_r = x_lin_ch26_w; 
-			x_lin_ch27_r = x_lin_ch27_w; 
-			x_lin_ch28_r = x_lin_ch28_w; 
-			x_lin_ch29_r = x_lin_ch29_w; 
-			x_lin_ch30_r = x_lin_ch30_w; 
-			x_lin_ch31_r = x_lin_ch31_w; 
-			x_lin_ch32_r = x_lin_ch32_w;
-		
+			output_ready_1 = 1'b0;
+			output_ready_2 = 1'b0;
+			output_ready_3 = 1'b0;
+			output_ready_4 = 1'b0;
 			//Channel 1
 			//Reciprocal standard deviation for the centered and scaled fit
 			recip_stdev_4_ch1_r_in = 32'd0;
@@ -12621,24 +12196,100 @@ always @(*) begin
 			x_adc_ch8_in_r = 21'd0;
 			
 			out_enable_r = 1'b0;
-			in_enable_r = 1'b0;
+			//in_enable_r = 1'b0;
 			next_state = S0;
 		end
 	endcase
 end
 
-////////////////////////////////////////////////////////////////////////////////
-//At clock edge
-always @(posedge clk) begin
-	if(reset == 1'b1) begin
-		state <= S0;
-	end
-	else begin
-		state <= next_state;
-	end
-	
-	GlobalReset <= reset;
-	
+always @(output_ready_1) begin
+	x_lin_ch1_r = x_lin_ch1_out_w;
+	x_lin_ch2_r = x_lin_ch2_out_w;
+	x_lin_ch3_r = x_lin_ch3_out_w;
+	x_lin_ch4_r = x_lin_ch4_out_w;
+	x_lin_ch5_r = x_lin_ch5_out_w;
+	x_lin_ch6_r = x_lin_ch6_out_w;
+	x_lin_ch7_r = x_lin_ch7_out_w;
+	x_lin_ch8_r = x_lin_ch8_out_w;
+end
+
+always @(output_ready_2) begin
+	x_lin_ch9_r = x_lin_ch1_out_w;
+	x_lin_ch10_r = x_lin_ch2_out_w;
+	x_lin_ch11_r = x_lin_ch3_out_w;
+	x_lin_ch12_r = x_lin_ch4_out_w;
+	x_lin_ch13_r = x_lin_ch5_out_w;
+	x_lin_ch14_r = x_lin_ch6_out_w;
+	x_lin_ch15_r = x_lin_ch7_out_w;
+	x_lin_ch16_r = x_lin_ch8_out_w;
+end
+
+always @(output_ready_3) begin
+	x_lin_ch17_r = x_lin_ch1_out_w;
+	x_lin_ch18_r = x_lin_ch2_out_w;
+	x_lin_ch19_r = x_lin_ch3_out_w;
+	x_lin_ch20_r = x_lin_ch4_out_w;
+	x_lin_ch21_r = x_lin_ch5_out_w;
+	x_lin_ch22_r = x_lin_ch6_out_w;
+	x_lin_ch23_r = x_lin_ch7_out_w;
+	x_lin_ch24_r = x_lin_ch8_out_w;
+end
+
+always @(output_ready_4) begin
+	x_lin_ch25_r = x_lin_ch1_out_w;
+	x_lin_ch26_r = x_lin_ch2_out_w;
+	x_lin_ch27_r = x_lin_ch3_out_w;
+	x_lin_ch28_r = x_lin_ch4_out_w;
+	x_lin_ch29_r = x_lin_ch5_out_w;
+	x_lin_ch30_r = x_lin_ch6_out_w;
+	x_lin_ch31_r = x_lin_ch7_out_w;
+	x_lin_ch32_r = x_lin_ch8_out_w;
+end
+
+always @(posedge srdyi or posedge out_enable_r) begin
+	if(srdyi == 1'b1)
+		in_enable_r = 1'b1;
+	else
+		in_enable_r = 1'b0;
+end
+
+always @(*) begin
+	srdyo = out_enable_r;
+	x_lin_ch1 = x_lin_ch1_r; 
+	x_lin_ch2 = x_lin_ch2_r; 
+	x_lin_ch3 = x_lin_ch3_r; 
+	x_lin_ch4 = x_lin_ch4_r; 
+	x_lin_ch5 = x_lin_ch5_r; 
+	x_lin_ch6 = x_lin_ch6_r; 
+	x_lin_ch7 = x_lin_ch7_r; 
+	x_lin_ch8 = x_lin_ch8_r; 
+	x_lin_ch9 = x_lin_ch9_r; 
+	x_lin_ch10 = x_lin_ch10_r; 
+	x_lin_ch11 = x_lin_ch11_r; 
+	x_lin_ch12 = x_lin_ch12_r; 
+	x_lin_ch13 = x_lin_ch13_r; 
+	x_lin_ch14 = x_lin_ch14_r; 
+	x_lin_ch15 = x_lin_ch15_r; 
+	x_lin_ch16 = x_lin_ch16_r; 
+	x_lin_ch17 = x_lin_ch17_r; 
+	x_lin_ch18 = x_lin_ch18_r; 
+	x_lin_ch19 = x_lin_ch19_r; 
+	x_lin_ch20 = x_lin_ch20_r; 
+	x_lin_ch21 = x_lin_ch21_r; 
+	x_lin_ch22 = x_lin_ch22_r; 
+	x_lin_ch23 = x_lin_ch23_r; 
+	x_lin_ch24 = x_lin_ch24_r; 
+	x_lin_ch25 = x_lin_ch25_r; 
+	x_lin_ch26 = x_lin_ch26_r; 
+	x_lin_ch27 = x_lin_ch27_r; 
+	x_lin_ch28 = x_lin_ch28_r; 
+	x_lin_ch29 = x_lin_ch29_r; 
+	x_lin_ch30 = x_lin_ch30_r; 
+	x_lin_ch31 = x_lin_ch31_r; 
+	x_lin_ch32 = x_lin_ch32_r;
+end 
+
+always @(posedge srdyi) begin
 	x_adc_ch1_r <= x_adc_ch1; 
 	x_adc_ch2_r <= x_adc_ch2; 
 	x_adc_ch3_r <= x_adc_ch3; 
@@ -12671,5 +12322,18 @@ always @(posedge clk) begin
 	x_adc_ch30_r <= x_adc_ch30; 
 	x_adc_ch31_r <= x_adc_ch31; 
 	x_adc_ch32_r <= x_adc_ch32;
+end
+
+////////////////////////////////////////////////////////////////////////////////
+//At clock edge
+always @(posedge clk) begin
+	if(reset == 1'b1) begin
+		state <= S0;
+	end
+	else begin
+		state <= next_state;
+	end
+	
+	GlobalReset <= reset;
 end
 endmodule

@@ -2308,7 +2308,7 @@ module NLC_4sec_10th_32ch(
 	input clk;
 	input reset;
 	
-	//ADC output
+	//Output
 	output [20:0] x_lin_ch1;
 	output [20:0] x_lin_ch2;
 	output [20:0] x_lin_ch3;
@@ -2341,10 +2341,10 @@ module NLC_4sec_10th_32ch(
 	output [20:0] x_lin_ch30;
 	output [20:0] x_lin_ch31;
 	output [20:0] x_lin_ch32;
-	output srdyi;
+	output srdyo;
 	
-	//NLC output
-	output srdyo; 
+	//Input	 
+	input srdyi;
 	/*
 	output srdyo_ch1; 
 	output srdyo_ch2; 
