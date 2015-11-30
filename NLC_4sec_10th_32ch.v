@@ -2345,40 +2345,6 @@ module NLC_4sec_10th_32ch(
 	
 	//Input	 
 	input srdyi;
-	/*
-	output srdyo_ch1; 
-	output srdyo_ch2; 
-	output srdyo_ch3; 
-	output srdyo_ch4; 
-	output srdyo_ch5; 
-	output srdyo_ch6; 
-	output srdyo_ch7; 
-	output srdyo_ch8; 
-	output srdyo_ch9; 
-	output srdyo_ch10; 
-	output srdyo_ch11; 
-	output srdyo_ch12; 
-	output srdyo_ch13; 
-	output srdyo_ch14; 
-	output srdyo_ch15; 
-	output srdyo_ch16; 
-	output srdyo_ch17; 
-	output srdyo_ch18; 
-	output srdyo_ch19; 
-	output srdyo_ch20; 
-	output srdyo_ch21; 
-	output srdyo_ch22; 
-	output srdyo_ch23; 
-	output srdyo_ch24; 
-	output srdyo_ch25; 
-	output srdyo_ch26; 
-	output srdyo_ch27; 
-	output srdyo_ch28; 
-	output srdyo_ch29; 
-	output srdyo_ch30; 
-	output srdyo_ch31; 
-	output srdyo_ch32; 
-	*/
 	input [20:0] x_adc_ch1; 
 	input [20:0] x_adc_ch2; 
 	input [20:0] x_adc_ch3; 
@@ -4590,6 +4556,41 @@ module NLC_4sec_10th_32ch(
 	
 	reg GlobalReset;
 	
+	wire srdyo_ch1; 
+	wire srdyo_ch2; 
+	wire srdyo_ch3; 
+	wire srdyo_ch4; 
+	wire srdyo_ch5; 
+	wire srdyo_ch6; 
+	wire srdyo_ch7; 
+	wire srdyo_ch8; 
+	wire srdyo_ch9; 
+	wire srdyo_ch10; 
+	wire srdyo_ch11; 
+	wire srdyo_ch12; 
+	wire srdyo_ch13; 
+	wire srdyo_ch14; 
+	wire srdyo_ch15; 
+	wire srdyo_ch16; 
+	wire srdyo_ch17; 
+	wire srdyo_ch18; 
+	wire srdyo_ch19; 
+	wire srdyo_ch20; 
+	wire srdyo_ch21; 
+	wire srdyo_ch22; 
+	wire srdyo_ch23; 
+	wire srdyo_ch24; 
+	wire srdyo_ch25; 
+	wire srdyo_ch26; 
+	wire srdyo_ch27; 
+	wire srdyo_ch28; 
+	wire srdyo_ch29; 
+	wire srdyo_ch30; 
+	wire srdyo_ch31; 
+	wire srdyo_ch32; 
+	
+	assign srdyo = srdyo_ch1;
+	
 /////////////////////////////////////////////////////////////
 //32 channels
 
@@ -4604,7 +4605,7 @@ NLC_4sec_10th_1ch CH1(
   .x_lin(x_lin_ch1),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch1), 
   .x_adc(x_adc_ch1), 
 
   //X-value that separates the sections
@@ -4686,7 +4687,7 @@ NLC_4sec_10th_1ch CH2(
   .x_lin(x_lin_ch2),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch2), 
   .x_adc(x_adc_ch2), 
 
   //X-value that separates the sections
@@ -4768,7 +4769,7 @@ NLC_4sec_10th_1ch CH3(
   .x_lin(x_lin_ch3),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch3), 
   .x_adc(x_adc_ch3), 
 
   //X-value that separates the sections
@@ -4850,7 +4851,7 @@ NLC_4sec_10th_1ch CH4(
   .x_lin(x_lin_ch4),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch4), 
   .x_adc(x_adc_ch4), 
 
   //X-value that separates the sections
@@ -4932,7 +4933,7 @@ NLC_4sec_10th_1ch CH5(
   .x_lin(x_lin_ch5),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch5), 
   .x_adc(x_adc_ch5), 
 
   //X-value that separates the sections
@@ -5014,7 +5015,7 @@ NLC_4sec_10th_1ch CH6(
   .x_lin(x_lin_ch6),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch6), 
   .x_adc(x_adc_ch6), 
 
   //X-value that separates the sections
@@ -5096,7 +5097,7 @@ NLC_4sec_10th_1ch CH7(
   .x_lin(x_lin_ch7),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch7), 
   .x_adc(x_adc_ch7), 
 
   //X-value that separates the sections
@@ -5178,7 +5179,7 @@ NLC_4sec_10th_1ch CH8(
   .x_lin(x_lin_ch8),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch8), 
   .x_adc(x_adc_ch8), 
 
   //X-value that separates the sections
@@ -5260,7 +5261,7 @@ NLC_4sec_10th_1ch CH9(
   .x_lin(x_lin_ch9),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch9), 
   .x_adc(x_adc_ch9), 
 
   //X-value that separates the sections
@@ -5342,7 +5343,7 @@ NLC_4sec_10th_1ch CH10(
   .x_lin(x_lin_ch10),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch10), 
   .x_adc(x_adc_ch10), 
 
   //X-value that separates the sections
@@ -5424,7 +5425,7 @@ NLC_4sec_10th_1ch CH11(
   .x_lin(x_lin_ch11),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch11), 
   .x_adc(x_adc_ch11), 
 
   //X-value that separates the sections
@@ -5506,7 +5507,7 @@ NLC_4sec_10th_1ch CH12(
   .x_lin(x_lin_ch12),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch12), 
   .x_adc(x_adc_ch12), 
 
   //X-value that separates the sections
@@ -5588,7 +5589,7 @@ NLC_4sec_10th_1ch CH13(
   .x_lin(x_lin_ch13),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch13), 
   .x_adc(x_adc_ch13), 
 
   //X-value that separates the sections
@@ -5670,7 +5671,7 @@ NLC_4sec_10th_1ch CH14(
   .x_lin(x_lin_ch14),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch14), 
   .x_adc(x_adc_ch14), 
 
   //X-value that separates the sections
@@ -5752,7 +5753,7 @@ NLC_4sec_10th_1ch CH15(
   .x_lin(x_lin_ch15),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch15), 
   .x_adc(x_adc_ch15), 
 
   //X-value that separates the sections
@@ -5834,7 +5835,7 @@ NLC_4sec_10th_1ch CH16(
   .x_lin(x_lin_ch16),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch16), 
   .x_adc(x_adc_ch16), 
 
   //X-value that separates the sections
@@ -5916,7 +5917,7 @@ NLC_4sec_10th_1ch CH17(
   .x_lin(x_lin_ch17),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch17), 
   .x_adc(x_adc_ch17), 
 
   //X-value that separates the sections
@@ -5998,7 +5999,7 @@ NLC_4sec_10th_1ch CH18(
   .x_lin(x_lin_ch18),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch18), 
   .x_adc(x_adc_ch18), 
 
   //X-value that separates the sections
@@ -6080,7 +6081,7 @@ NLC_4sec_10th_1ch CH19(
   .x_lin(x_lin_ch19),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch19), 
   .x_adc(x_adc_ch19), 
 
   //X-value that separates the sections
@@ -6162,7 +6163,7 @@ NLC_4sec_10th_1ch CH20(
   .x_lin(x_lin_ch20),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch20), 
   .x_adc(x_adc_ch20), 
 
   //X-value that separates the sections
@@ -6244,7 +6245,7 @@ NLC_4sec_10th_1ch CH21(
   .x_lin(x_lin_ch21),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch21), 
   .x_adc(x_adc_ch21), 
 
   //X-value that separates the sections
@@ -6326,7 +6327,7 @@ NLC_4sec_10th_1ch CH22(
   .x_lin(x_lin_ch22),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch22), 
   .x_adc(x_adc_ch22), 
 
   //X-value that separates the sections
@@ -6408,7 +6409,7 @@ NLC_4sec_10th_1ch CH23(
   .x_lin(x_lin_ch23),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch23), 
   .x_adc(x_adc_ch23), 
 
   //X-value that separates the sections
@@ -6490,7 +6491,7 @@ NLC_4sec_10th_1ch CH24(
   .x_lin(x_lin_ch24),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch24), 
   .x_adc(x_adc_ch24), 
 
   //X-value that separates the sections
@@ -6572,7 +6573,7 @@ NLC_4sec_10th_1ch CH25(
   .x_lin(x_lin_ch25),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch25), 
   .x_adc(x_adc_ch25), 
 
   //X-value that separates the sections
@@ -6654,7 +6655,7 @@ NLC_4sec_10th_1ch CH26(
   .x_lin(x_lin_ch26),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch26), 
   .x_adc(x_adc_ch26), 
 
   //X-value that separates the sections
@@ -6736,7 +6737,7 @@ NLC_4sec_10th_1ch CH27(
   .x_lin(x_lin_ch27),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch27), 
   .x_adc(x_adc_ch27), 
 
   //X-value that separates the sections
@@ -6818,7 +6819,7 @@ NLC_4sec_10th_1ch CH28(
   .x_lin(x_lin_ch28),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch28), 
   .x_adc(x_adc_ch28), 
 
   //X-value that separates the sections
@@ -6900,7 +6901,7 @@ NLC_4sec_10th_1ch CH29(
   .x_lin(x_lin_ch29),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch29), 
   .x_adc(x_adc_ch29), 
 
   //X-value that separates the sections
@@ -6982,7 +6983,7 @@ NLC_4sec_10th_1ch CH30(
   .x_lin(x_lin_ch30),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch30), 
   .x_adc(x_adc_ch30), 
 
   //X-value that separates the sections
@@ -7064,7 +7065,7 @@ NLC_4sec_10th_1ch CH31(
   .x_lin(x_lin_ch31),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch31), 
   .x_adc(x_adc_ch31), 
 
   //X-value that separates the sections
@@ -7146,7 +7147,7 @@ NLC_4sec_10th_1ch CH32(
   .x_lin(x_lin_ch32),
 
   //NLC output
-  .srdyo(srdyo), 
+  .srdyo(srdyo_ch32), 
   .x_adc(x_adc_ch32), 
 
   //X-value that separates the sections
@@ -7216,7 +7217,6 @@ NLC_4sec_10th_1ch CH32(
   .coeff_1_1(coeff_1_1_ch32), 
   .coeff_1_0(coeff_1_0_ch32) 
 );
-
 
 ////////////////////////////////////////////////////////////////////////////////
 //At clock edge

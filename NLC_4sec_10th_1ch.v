@@ -192,14 +192,6 @@ module NLC_4sec_10th_1ch(
 	reg [31:0] coeffs10_r;
 	reg [31:0] mean_r;
 	reg [31:0] std_r;
-
-	//Output
-	reg [20:0] out_r;
-	//assign x_lin = out_r;
-
-	//Output enable
-	reg out_enable_r;
-	//assign srdyo = out_enable_r;
 	
 	//Convert x to smc
 	wire [31:0] x_new_w;
@@ -228,7 +220,6 @@ module NLC_4sec_10th_1ch(
 	reg [31:0] in_add_y_r;
 	wire [31:0] out_add_z_w;
 	
-	//Parameters
 	//Parameters
 	parameter S0 = 5'b00000; 
 	parameter S1 = 5'b00001; 
@@ -317,7 +308,7 @@ smc_float_adder add(
 	.srdyo_o(add_out_valid_w)
 );
 
-always @(posedge srdyi or posedge out_enable_r) begin
+always @(posedge srdyi or posedge srdyo) begin
 	if(srdyi == 1'b1)
 		in_enable_r = 1'b1;
 	else
@@ -327,7 +318,7 @@ end
 always @(*) begin
 	case(state) 
 		S0: begin
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;
 			smc_to_fp_in_valid_r = 1'b0;
 			add_in_valid_r = 1'b0;
@@ -338,7 +329,7 @@ always @(*) begin
 			in_mul_y_r = 32'd0;
 			in_smc_to_fp_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
-			out_r = 21'd0;
+			x_lin = 21'd0;
 
 			x_conditioned_ready = 1'b1;
 
@@ -351,10 +342,9 @@ always @(*) begin
 			next_state = S2;
 			in_fp_to_smc_r = i_x_r;
 			fp_to_smc_in_valid_r = 1'b1;
-			//in_enable_r = 1'b0;
 			
 			x_conditioned_ready = 1'b0;
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			smc_to_fp_in_valid_r = 1'b0;
 			add_in_valid_r = 1'b0;
 			mul_in_valid_r = 1'b0;
@@ -363,7 +353,7 @@ always @(*) begin
 			in_mul_x_r = 32'd0;
 			in_mul_y_r = 32'd0;
 			in_smc_to_fp_r = 32'd0;
-			out_r = 21'd0;
+			x_lin = 21'd0;
 		end
 		S2: begin //when output ready, send to adder
 			if(convert_to_smc_out_valid_w == 1'b1) begin
@@ -381,15 +371,14 @@ always @(*) begin
 				in_add_y_r = 32'd0;
 			end
 			x_conditioned_ready = 1'b0;
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			smc_to_fp_in_valid_r = 1'b0;
 			mul_in_valid_r = 1'b0;
 			in_mul_x_r = 32'd0;
 			in_mul_y_r = 32'd0;
 			in_smc_to_fp_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
-			out_r = 21'd0;
-			//in_enable_r = 1'b0;
+			x_lin = 21'd0;
 		end
 		S3: begin //when adder output ready, send to multiplier
 			if(add_out_valid_w == 1'b1) begin
@@ -407,15 +396,14 @@ always @(*) begin
 				in_mul_y_r = 32'd0;
 			end
 			x_conditioned_ready = 1'b0;
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;
 			smc_to_fp_in_valid_r = 1'b0;
 			in_add_x_r = 32'd0;
 			in_add_y_r = 32'd0;
 			in_smc_to_fp_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
-			out_r = 21'd0;
-			//in_enable_r = 1'b0;
+			x_lin = 21'd0;
 		end
 		S4: begin //when multiplier output ready, send back to multiplier with accumulator
 			if(multiply_out_valid_w == 1'b1) begin
@@ -433,7 +421,7 @@ always @(*) begin
 				x_conditioned_ready = 1'b0;
 			end
 			
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;
 			smc_to_fp_in_valid_r = 1'b0;
 			add_in_valid_r = 1'b0;
@@ -441,15 +429,14 @@ always @(*) begin
 			in_add_y_r = 32'd0;
 			in_smc_to_fp_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
-			out_r = 21'd0;
-			//in_enable_r = 1'b0;
+			x_lin = 21'd0;
 		end
 		S5: begin
 			next_state = S6;
 			mul_in_valid_r = 1'b0;
 			
 			x_conditioned_ready = 1'b0;
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;
 			smc_to_fp_in_valid_r = 1'b0;
 			add_in_valid_r = 1'b0;
@@ -459,8 +446,7 @@ always @(*) begin
 			in_mul_y_r = 32'd0;
 			in_smc_to_fp_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
-			out_r = 21'd0;
-			//in_enable_r = 1'b0;
+			x_lin = 21'd0;
 		end
 		S6: begin //multiply x and current accumulator - loop 1 - coeffs10_r
 			if(multiply_out_valid_w == 1'b1) begin
@@ -477,7 +463,7 @@ always @(*) begin
 			end
 			
 			x_conditioned_ready = 1'b0;
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;	
 			smc_to_fp_in_valid_r = 1'b0;
 			mul_in_valid_r = 1'b0;
@@ -485,8 +471,7 @@ always @(*) begin
 			in_mul_y_r = 32'd0;
 			in_smc_to_fp_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
-			out_r = 21'd0;
-			//in_enable_r = 1'b0;
+			x_lin = 21'd0;
 		end
 		S7: begin //add coeff to product
 			if(add_out_valid_w == 1'b1) begin
@@ -506,13 +491,12 @@ always @(*) begin
 			smc_to_fp_in_valid_r = 1'b0;
 			in_smc_to_fp_r = 32'd0;
 			x_conditioned_ready = 1'b0;
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;
 			in_add_x_r = 32'd0;
 			in_add_y_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
-			out_r = 21'd0;
-			//in_enable_r = 1'b0;
+			x_lin = 21'd0;
 		end
 		S8: begin //multiply x and current accumulator - loop 2 - coeffs9_r
 			if(multiply_out_valid_w == 1'b1) begin
@@ -529,7 +513,7 @@ always @(*) begin
 			end
 			
 			x_conditioned_ready = 1'b0;
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;	
 			smc_to_fp_in_valid_r = 1'b0;
 			mul_in_valid_r = 1'b0;
@@ -537,8 +521,7 @@ always @(*) begin
 			in_mul_y_r = 32'd0;
 			in_smc_to_fp_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
-			out_r = 21'd0;
-			//in_enable_r = 1'b0;
+			x_lin = 21'd0;
 		end
 		S9: begin //add coeff to product
 			if(add_out_valid_w == 1'b1) begin
@@ -558,13 +541,12 @@ always @(*) begin
 			smc_to_fp_in_valid_r = 1'b0;
 			in_smc_to_fp_r = 32'd0;
 			x_conditioned_ready = 1'b0;
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;
 			in_add_x_r = 32'd0;
 			in_add_y_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
-			out_r = 21'd0;
-			//in_enable_r = 1'b0;
+			x_lin = 21'd0;
 		end
 		S10: begin //multiply x and current accumulator - loop 3 - coeffs8_r
 			if(multiply_out_valid_w == 1'b1) begin
@@ -581,7 +563,7 @@ always @(*) begin
 			end
 			
 			x_conditioned_ready = 1'b0;
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;	
 			smc_to_fp_in_valid_r = 1'b0;
 			mul_in_valid_r = 1'b0;
@@ -589,8 +571,7 @@ always @(*) begin
 			in_mul_y_r = 32'd0;
 			in_smc_to_fp_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
-			out_r = 21'd0;
-			//in_enable_r = 1'b0;
+			x_lin = 21'd0;
 		end
 		S11: begin //add coeff to product
 			if(add_out_valid_w == 1'b1) begin
@@ -610,13 +591,12 @@ always @(*) begin
 			smc_to_fp_in_valid_r = 1'b0;
 			in_smc_to_fp_r = 32'd0;
 			x_conditioned_ready = 1'b0;
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;
 			in_add_x_r = 32'd0;
 			in_add_y_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
-			out_r = 21'd0;
-			//in_enable_r = 1'b0;
+			x_lin = 21'd0;
 		end
 		S12: begin //multiply x and current accumulator - loop 4 - coeffs7_r
 			if(multiply_out_valid_w == 1'b1) begin
@@ -633,7 +613,7 @@ always @(*) begin
 			end
 			
 			x_conditioned_ready = 1'b0;
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;	
 			smc_to_fp_in_valid_r = 1'b0;
 			mul_in_valid_r = 1'b0;
@@ -641,8 +621,7 @@ always @(*) begin
 			in_mul_y_r = 32'd0;
 			in_smc_to_fp_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
-			out_r = 21'd0;
-			//in_enable_r = 1'b0;
+			x_lin = 21'd0;
 		end
 		S13: begin //add coeff to product
 			if(add_out_valid_w == 1'b1) begin
@@ -662,13 +641,12 @@ always @(*) begin
 			smc_to_fp_in_valid_r = 1'b0;
 			in_smc_to_fp_r = 32'd0;
 			x_conditioned_ready = 1'b0;
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;
 			in_add_x_r = 32'd0;
 			in_add_y_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
-			out_r = 21'd0;
-			//in_enable_r = 1'b0;
+			x_lin = 21'd0;
 		end
 		S14: begin //multiply x and current accumulator - loop 5 - coeffs6_r
 			if(multiply_out_valid_w == 1'b1) begin
@@ -685,7 +663,7 @@ always @(*) begin
 			end
 			
 			x_conditioned_ready = 1'b0;
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;	
 			smc_to_fp_in_valid_r = 1'b0;
 			mul_in_valid_r = 1'b0;
@@ -693,8 +671,7 @@ always @(*) begin
 			in_mul_y_r = 32'd0;
 			in_smc_to_fp_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
-			out_r = 21'd0;
-			//in_enable_r = 1'b0;
+			x_lin = 21'd0;
 		end
 		S15: begin //add coeff to product
 			if(add_out_valid_w == 1'b1) begin
@@ -714,13 +691,12 @@ always @(*) begin
 			smc_to_fp_in_valid_r = 1'b0;
 			in_smc_to_fp_r = 32'd0;
 			x_conditioned_ready = 1'b0;
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;
 			in_add_x_r = 32'd0;
 			in_add_y_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
-			out_r = 21'd0;
-			//in_enable_r = 1'b0;
+			x_lin = 21'd0;
 		end
 		S16: begin //multiply x and current accumulator - loop 6 - coeffs5_r
 			if(multiply_out_valid_w == 1'b1) begin
@@ -737,7 +713,7 @@ always @(*) begin
 			end
 			
 			x_conditioned_ready = 1'b0;
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;	
 			smc_to_fp_in_valid_r = 1'b0;
 			mul_in_valid_r = 1'b0;
@@ -745,8 +721,7 @@ always @(*) begin
 			in_mul_y_r = 32'd0;
 			in_smc_to_fp_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
-			out_r = 21'd0;
-			//in_enable_r = 1'b0;
+			x_lin = 21'd0;
 		end
 		S17: begin //add coeff to product
 			if(add_out_valid_w == 1'b1) begin
@@ -766,13 +741,12 @@ always @(*) begin
 			smc_to_fp_in_valid_r = 1'b0;
 			in_smc_to_fp_r = 32'd0;
 			x_conditioned_ready = 1'b0;
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;
 			in_add_x_r = 32'd0;
 			in_add_y_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
-			out_r = 21'd0;
-			//in_enable_r = 1'b0;
+			x_lin = 21'd0;
 		end
 		S18: begin //multiply x and current accumulator - loop 7 - coeffs4_r
 			if(multiply_out_valid_w == 1'b1) begin
@@ -789,7 +763,7 @@ always @(*) begin
 			end
 			
 			x_conditioned_ready = 1'b0;
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;	
 			smc_to_fp_in_valid_r = 1'b0;
 			mul_in_valid_r = 1'b0;
@@ -797,8 +771,7 @@ always @(*) begin
 			in_mul_y_r = 32'd0;
 			in_smc_to_fp_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
-			out_r = 21'd0;
-			//in_enable_r = 1'b0;
+			x_lin = 21'd0;
 		end
 		S19: begin //add coeff to product
 			if(add_out_valid_w == 1'b1) begin
@@ -818,13 +791,12 @@ always @(*) begin
 			smc_to_fp_in_valid_r = 1'b0;
 			in_smc_to_fp_r = 32'd0;
 			x_conditioned_ready = 1'b0;
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;
 			in_add_x_r = 32'd0;
 			in_add_y_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
-			out_r = 21'd0;
-			//in_enable_r = 1'b0;
+			x_lin = 21'd0;
 		end
 		S20: begin //multiply x and current accumulator - loop 8 - coeffs3_r
 			if(multiply_out_valid_w == 1'b1) begin
@@ -841,7 +813,7 @@ always @(*) begin
 			end
 			
 			x_conditioned_ready = 1'b0;
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;	
 			smc_to_fp_in_valid_r = 1'b0;
 			mul_in_valid_r = 1'b0;
@@ -849,8 +821,7 @@ always @(*) begin
 			in_mul_y_r = 32'd0;
 			in_smc_to_fp_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
-			out_r = 21'd0;
-			//in_enable_r = 1'b0;
+			x_lin = 21'd0;
 		end
 		S21: begin //add coeff to product
 			if(add_out_valid_w == 1'b1) begin
@@ -870,13 +841,12 @@ always @(*) begin
 			smc_to_fp_in_valid_r = 1'b0;
 			in_smc_to_fp_r = 32'd0;
 			x_conditioned_ready = 1'b0;
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;
 			in_add_x_r = 32'd0;
 			in_add_y_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
-			out_r = 21'd0;
-			//in_enable_r = 1'b0;
+			x_lin = 21'd0;
 		end
 		S22: begin //multiply x and current accumulator - loop 9 - coeffs2_r
 			if(multiply_out_valid_w == 1'b1) begin
@@ -893,7 +863,7 @@ always @(*) begin
 			end
 			
 			x_conditioned_ready = 1'b0;
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;	
 			smc_to_fp_in_valid_r = 1'b0;
 			mul_in_valid_r = 1'b0;
@@ -901,8 +871,7 @@ always @(*) begin
 			in_mul_y_r = 32'd0;
 			in_smc_to_fp_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
-			out_r = 21'd0;
-			//in_enable_r = 1'b0;
+			x_lin = 21'd0;
 		end
 		S23: begin //add coeff to product
 			if(add_out_valid_w == 1'b1) begin
@@ -922,13 +891,12 @@ always @(*) begin
 			smc_to_fp_in_valid_r = 1'b0;
 			in_smc_to_fp_r = 32'd0;
 			x_conditioned_ready = 1'b0;
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;
 			in_add_x_r = 32'd0;
 			in_add_y_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
-			out_r = 21'd0;
-			//in_enable_r = 1'b0;
+			x_lin = 21'd0;
 		end
 		S24: begin //multiply x and current accumulator - loop 10 - coeffs1_r
 			if(multiply_out_valid_w == 1'b1) begin
@@ -945,7 +913,7 @@ always @(*) begin
 			end
 			
 			x_conditioned_ready = 1'b0;
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;	
 			smc_to_fp_in_valid_r = 1'b0;
 			mul_in_valid_r = 1'b0;
@@ -953,8 +921,7 @@ always @(*) begin
 			in_mul_y_r = 32'd0;
 			in_smc_to_fp_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
-			out_r = 21'd0;
-			//in_enable_r = 1'b0;
+			x_lin = 21'd0;
 		end
 		S25: begin //add coeff to product
 			if(add_out_valid_w == 1'b1) begin
@@ -974,13 +941,12 @@ always @(*) begin
 			smc_to_fp_in_valid_r = 1'b0;
 			in_smc_to_fp_r = 32'd0;
 			x_conditioned_ready = 1'b0;
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;
 			in_add_x_r = 32'd0;
 			in_add_y_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
-			out_r = 21'd0;
-			//in_enable_r = 1'b0;
+			x_lin = 21'd0;
 		end
 		S26: begin //multiply x and current accumulator - loop 11 - coeffs0_r
 			if(multiply_out_valid_w == 1'b1) begin
@@ -997,7 +963,7 @@ always @(*) begin
 			end
 			
 			x_conditioned_ready = 1'b0;
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;	
 			smc_to_fp_in_valid_r = 1'b0;
 			mul_in_valid_r = 1'b0;
@@ -1005,8 +971,7 @@ always @(*) begin
 			in_mul_y_r = 32'd0;
 			in_smc_to_fp_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
-			out_r = 21'd0;
-			//in_enable_r = 1'b0;
+			x_lin = 21'd0;
 		end
 		S27: begin //add coeff to product
 			if(add_out_valid_w == 1'b1) begin
@@ -1022,7 +987,7 @@ always @(*) begin
 				in_smc_to_fp_r = 32'd0;
 			end
 			x_conditioned_ready = 1'b0;
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;
 			in_add_x_r = 32'd0;
 			in_add_y_r = 32'd0;
@@ -1030,21 +995,20 @@ always @(*) begin
 			in_mul_y_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
 			mul_in_valid_r = 1'b0;
-			out_r = 21'd0;
-			//in_enable_r = 1'b0;
+			x_lin = 21'd0;
 		end
 		S28: begin
 			if(convert_to_fp_out_valid_w == 1'b1) begin
-				out_r = out_smc_to_fp_w;
-				out_enable_r = 1'b1;
+				x_lin = out_smc_to_fp_w;
+				srdyo = 1'b1;
 				next_state = S0;
 				smc_to_fp_in_valid_r = 1'b0;
 			end
 			else begin
 				next_state = S28;
 				smc_to_fp_in_valid_r = 1'b0;
-				out_enable_r = 1'b0;
-				out_r = 21'd0;
+				srdyo = 1'b0;
+				x_lin = 21'd0;
 			end
 			x_conditioned_ready = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;
@@ -1056,11 +1020,10 @@ always @(*) begin
 			in_mul_y_r = 32'd0;
 			in_smc_to_fp_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
-			//in_enable_r = 1'b0;
 		end
 		default: begin
 			next_state = S0; //Should never hit this case
-			out_enable_r = 1'b0;
+			srdyo = 1'b0;
 			fp_to_smc_in_valid_r = 1'b0;
 			smc_to_fp_in_valid_r = 1'b0;
 			add_in_valid_r = 1'b0;
@@ -1071,9 +1034,8 @@ always @(*) begin
 			in_mul_y_r = 32'd0;
 			in_smc_to_fp_r = 32'd0;
 			in_fp_to_smc_r = 21'd0;
-			out_r = 21'd0;
+			x_lin = 21'd0;
 			x_conditioned_ready = 1'b0;
-			//in_enable_r = 1'b0;
 		end
 		endcase
 end
@@ -1084,11 +1046,6 @@ always @(posedge x_conditioned_ready) begin
 	else
 		x_new_final_r = out_mul_z_w;
 end	
-
-always @(*) begin
-	x_lin = out_r;
-	srdyo = out_enable_r;
-end
 
 ////////////////////////////////////////////////////////////////////////////
 //Determine section

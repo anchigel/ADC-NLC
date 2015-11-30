@@ -1833,7 +1833,7 @@ module NLC_4sec_10th_order_32ch_v0 (
 
 );
 
-NLC_4sec_10th_32ch UUT(
+NLC_4sec_10th_32ch_opt UUT(
   //System clock and reset
   .clk(clk),
   .reset(GlobalReset),
